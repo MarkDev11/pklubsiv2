@@ -1,0 +1,43 @@
+<?php
+
+namespace Tests\Feature\Auth;
+
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
+
+class PasswordResetTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_reset_password_link_screen_can_be_rendered(): void
+    {
+        $this->get('/forgot-password')->assertNotFound();
+    }
+
+    public function test_reset_password_link_can_be_requested(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $this->post('/forgot-password', ['email' => $user->email])->assertNotFound();
+    }
+
+    public function test_reset_password_screen_can_be_rendered(): void
+    {
+        $this->get('/reset-password/dummy-token')->assertNotFound();
+    }
+
+    public function test_password_can_be_reset_with_valid_token(): void
+    {
+        /** @var User $user */
+        $user = User::factory()->create();
+
+        $this->post('/reset-password', [
+            'token' => 'dummy-token',
+            'email' => $user->email,
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ])->assertNotFound();
+    }
+}

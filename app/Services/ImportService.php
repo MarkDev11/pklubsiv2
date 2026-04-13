@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Services;
+
+use App\Enums\UserRole;
+use App\Models\ActivityLog;
+use App\Models\User;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
+class ImportService
+{
+    public function __construct(
+        protected UserService $userService
+    ) {}
+
+    public function importFromExcel(string $fullPath, int $adminId): int
+    {
+        $spreadsheet = IOFactory::load($fullPath);
+        $sheet = $spreadsheet->getSheet(0);
+        $highestRow = $sheet->getHighestRow();
+
+        if ($highestRow <= 1) {
+            return 0;
+        }
+
+        $validRoles = UserRole::values();
+        $count = 0;
+
+        for ($row = 2; $row <= $highestRow; $row++) {
+            $name = trim($sheet->getCell('A'.$row)->getValue() ?? '');
+            $nim = trim($sheet->getCell('B'.$row)->getValue() ?? '');
+            $password = trim($sheet->getCell('C'.$row)->getValue() ?? '');
+            $role = strtolower(trim($sheet->getCell('D'.$row)->getValue() ?? 'mahasiswa'));
+            $dosenPA = trim($sheet->getCell('E'.$row)->getValue() ?? '');
+            $jenis = trim($sheet->getCell('F'.$row)->getValue() ?? '');
+            $kdLokal = trim($sheet->getCell('G'.$row)->getValue() ?? '');
+
+            if (empty($name) || empty($nim)) {
+                continue;
+            }
+
+            if (User::where('username', $nim)->exists()) {
+                continue;
+            }
+
+            $this->userService->createAccount([
+                'name' => $name,
+                'username' => $nim,
+                'password' => $password ?: null,
+                'role' => in_array($role, $validRoles, true) ? $role : UserRole::Mahasiswa->value,
+                'nama_dosen_pa' => $dosenPA ?: null,
+                'jenis' => $jenis ?: null,
+                'kd_lokal' => $kdLokal ?: null,
+            ]);
+
+            $count++;
+        }
+
+        ActivityLog::log($adminId, 'Import data: '.$count.' akun');
+
+        return $count;
+    }
+}

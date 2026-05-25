@@ -240,14 +240,16 @@
                 {{-- Right Actions --}}
                 <div class="flex items-center gap-3">
                     {{-- Live Clock --}}
-                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" x-data="{ time: '{{ now()->format('H.i.s') }}', date: '{{ now()->format('l, d M Y') }}' }" x-init="
-                        const serverMs = {{ now()->getTimestampMs() }};
-                        const browserMs = Date.now();
-                        const offset = serverMs - browserMs;
+                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" x-data="{ time: '{{ now()->setTimezone('Asia/Jakarta')->format('H.i.s') }}', date: '{{ now()->setTimezone('Asia/Jakarta')->format('l, d M Y') }}' }" x-init="
+                        const serverTime = new Date('{{ now()->setTimezone('Asia/Jakarta')->toIso8601String() }}');
+                        const clientTime = new Date();
+                        const offset = serverTime.getTime() - clientTime.getTime();
                         const update = () => {
                             const now = new Date(Date.now() + offset);
-                            time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
-                            date = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
+                            const formatter = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
+                            const dateFormatter = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
+                            time = formatter.format(now);
+                            date = dateFormatter.format(now);
                         };
                         update();
                         setInterval(update, 1000);

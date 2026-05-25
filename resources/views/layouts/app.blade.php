@@ -240,7 +240,7 @@
                 {{-- Right Actions --}}
                 <div class="flex items-center gap-3">
                     {{-- Live Clock --}}
-                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" id="live-clock">
+                    <div class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" id="live-clock">
                         <div class="text-right">
                             <p class="text-xs font-semibold text-gray-700 dark:text-gray-300" id="clock-time">--:--:--</p>
                             <p class="text-[10px] text-gray-400 dark:text-gray-500" id="clock-date">--/--/----</p>

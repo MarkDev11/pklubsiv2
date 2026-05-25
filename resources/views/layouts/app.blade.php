@@ -241,12 +241,12 @@
                 <div class="flex items-center gap-3">
                     {{-- Live Clock --}}
                     <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" 
-                         data-server-time="{{ now()->setTimezone('Asia/Jakarta')->toIso8601String() }}"
+                         data-server-time="{{ now()->getTimestamp() * 1000 }}"
                          x-data="{ time: '', date: '' }" 
                          x-init="
-                            const serverTime = new Date(this.$el.dataset.serverTime);
-                            const clientTime = new Date();
-                            const offset = serverTime.getTime() - clientTime.getTime();
+                            const serverMs = parseInt(this.$el.dataset.serverTime);
+                            const clientMs = Date.now();
+                            const offset = serverMs - clientMs;
                             const update = () => {
                                 const now = new Date(Date.now() + offset);
                                 const formatter = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });

@@ -17,7 +17,8 @@ class ResetPasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'password_confirmation' => ['required', 'string', 'min:8'],
         ];
     }
 
@@ -26,6 +27,9 @@ class ResetPasswordRequest extends FormRequest
         return [
             'password.required' => 'Password baru wajib diisi.',
             'password.min' => 'Password minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak sesuai.',
+            'password_confirmation.required' => 'Konfirmasi password wajib diisi.',
+            'password_confirmation.min' => 'Konfirmasi password minimal 8 karakter.',
         ];
     }
 }

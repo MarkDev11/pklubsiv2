@@ -118,7 +118,8 @@
                     <form method="POST" action="{{ route('admin.akun.reset-password', encryptUrl($user->username)) }}" class="p-6">
                         @csrf
                         <div class="space-y-3">
-                            <input type="password" name="password" placeholder="Password baru (min 6 karakter)" class="form-input" required minlength="6">
+                            <input type="password" name="password" placeholder="Password baru (min 8 karakter)" class="form-input" required minlength="8">
+                            <input type="password" name="password_confirmation" placeholder="Konfirmasi password" class="form-input" required minlength="8">
                             <button type="submit" class="btn-danger w-full justify-center">
                                 <i class="fa-solid fa-rotate text-sm"></i> Reset Password
                             </button>

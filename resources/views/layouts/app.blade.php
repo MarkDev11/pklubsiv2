@@ -240,26 +240,10 @@
                 {{-- Right Actions --}}
                 <div class="flex items-center gap-3">
                     {{-- Live Clock --}}
-                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" 
-                         data-server-time="{{ now()->getTimestamp() * 1000 }}"
-                         x-data="{ time: '', date: '' }" 
-                         x-init="
-                            const serverMs = parseInt(this.$el.dataset.serverTime);
-                            const clientMs = Date.now();
-                            const offset = serverMs - clientMs;
-                            const update = () => {
-                                const now = new Date(Date.now() + offset);
-                                const formatter = new Intl.DateTimeFormat('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'Asia/Jakarta' });
-                                const dateFormatter = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
-                                time = formatter.format(now);
-                                date = dateFormatter.format(now);
-                            };
-                            update();
-                            setInterval(update, 1000);
-                         ">
+                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" id="live-clock">
                         <div class="text-right">
-                            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300" x-text="time"></p>
-                            <p class="text-[10px] text-gray-400 dark:text-gray-500" x-text="date"></p>
+                            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300" id="clock-time">--:--:--</p>
+                            <p class="text-[10px] text-gray-400 dark:text-gray-500" id="clock-date">--/--/----</p>
                         </div>
                         <div class="w-px h-8 bg-gray-200 dark:bg-surface-700 mx-1"></div>
                     </div>
@@ -317,6 +301,37 @@
 
     {{-- AI Chatbot Floating Button --}}
     @include('components.ai-chatbot')
+
+    {{-- Live Clock Script --}}
+    <script>
+        function updateClock() {
+            const formatter = new Intl.DateTimeFormat('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Jakarta'
+            });
+            const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                timeZone: 'Asia/Jakarta'
+            });
+
+            const timeEl = document.getElementById('clock-time');
+            const dateEl = document.getElementById('clock-date');
+
+            if (timeEl) timeEl.textContent = formatter.format(new Date());
+            if (dateEl) dateEl.textContent = dateFormatter.format(new Date());
+        }
+
+        // Update immediately
+        updateClock();
+
+        // Update every second
+        setInterval(updateClock, 1000);
+    </script>
 
 </body>
 </html>

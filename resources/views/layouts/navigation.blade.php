@@ -18,6 +18,14 @@
                 </div>
             </div>
 
+            <!-- Current Time & Date -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 sm:me-4">
+                <div class="text-sm text-gray-600 font-medium" id="current-time">
+                    <span id="time-display">--:--:--</span>
+                    <span id="date-display">--/--/----</span>
+                </div>
+            </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
@@ -97,4 +105,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Time & Date Update Script -->
+    <script>
+        function updateTimeDate() {
+            const formatter = new Intl.DateTimeFormat('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                timeZone: 'Asia/Jakarta'
+            });
+            const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                timeZone: 'Asia/Jakarta'
+            });
+
+            const timeDisplay = document.getElementById('time-display');
+            const dateDisplay = document.getElementById('date-display');
+
+            if (timeDisplay) timeDisplay.textContent = formatter.format(new Date());
+            if (dateDisplay) dateDisplay.textContent = dateFormatter.format(new Date());
+        }
+
+        // Update immediately on load
+        updateTimeDate();
+
+        // Update every second
+        setInterval(updateTimeDate, 1000);
+    </script>
 </nav>

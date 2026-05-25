@@ -240,10 +240,12 @@
                 {{-- Right Actions --}}
                 <div class="flex items-center gap-3">
                     {{-- Live Clock --}}
-                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" x-data="{ time: '', date: '' }" x-init="
-                        const serverTime = new Date('{{ now()->toIso8601String() }}');
+                    <div class="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400" x-data="{ time: '{{ now()->format('H.i.s') }}', date: '{{ now()->format('l, d M Y') }}' }" x-init="
+                        const serverMs = {{ now()->getTimestampMs() }};
+                        const browserMs = Date.now();
+                        const offset = serverMs - browserMs;
                         const update = () => {
-                            const now = new Date(serverTime.getTime() + (Date.now() - serverTime.getTime()));
+                            const now = new Date(Date.now() + offset);
                             time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                             date = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
                         };

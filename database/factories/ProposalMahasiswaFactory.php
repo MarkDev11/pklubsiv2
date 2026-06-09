@@ -21,7 +21,7 @@ class ProposalMahasiswaFactory extends Factory
             'hp_mentor' => fake()->numerify('08##########'),
             'email_mentor' => fake()->unique()->companyEmail(),
             'email_perusahaan' => fake()->optional()->companyEmail(),
-            'dosen_pa' => fake()->name(),
+            'dosen_pa' => 'DSN000001',
             'skm' => null,
             'proposal' => null,
             'lp' => null,

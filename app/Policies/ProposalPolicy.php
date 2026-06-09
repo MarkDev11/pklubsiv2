@@ -32,7 +32,7 @@ class ProposalPolicy
         return match ($user->role) {
             UserRole::Admin => true,
             UserRole::Mahasiswa => $proposal->user_id === $user->id,
-            UserRole::Dosen => $proposal->dosen_pa === $user->name,
+            UserRole::Dosen => $proposal->dosen_pa === $user->username,
             UserRole::Mentor => $proposal->email_mentor === $user->username,
         };
     }
@@ -57,7 +57,7 @@ class ProposalPolicy
     {
         return match ($user->role) {
             UserRole::Admin => true,
-            UserRole::Dosen => $proposal->dosen_pa === $user->name,
+            UserRole::Dosen => $proposal->dosen_pa === $user->username,
             UserRole::Mentor => $proposal->email_mentor === $user->username,
             default => false,
         };

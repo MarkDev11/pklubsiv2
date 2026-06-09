@@ -84,8 +84,16 @@
                                 </div>
                             </div>
                             <div class="flex flex-col">
-                                <label class="form-label mb-2"><i class="fa-solid fa-chalkboard-user text-[11px] mr-1.5 text-gray-400"></i>Nama Dosen PA</label>
-                                <input type="text" name="nama_dosen_pa" value="{{ old('nama_dosen_pa', $user->nama_dosen_pa) }}" class="form-input" placeholder="Kosongkan jika bukan mahasiswa">
+                                <label class="form-label mb-2"><i class="fa-solid fa-chalkboard-user text-[11px] mr-1.5 text-gray-400"></i>NIP Dosen PA</label>
+                                <select name="nama_dosen_pa" class="form-select">
+                                    <option value="">-- Kosongkan jika bukan mahasiswa --</option>
+                                    @foreach($dosenList as $dosen)
+                                        <option value="{{ $dosen->username }}" {{ old('nama_dosen_pa', $user->nama_dosen_pa) === $dosen->username ? 'selected' : '' }}>
+                                            {{ $dosen->name }} (NIP: {{ $dosen->username }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('nama_dosen_pa') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
                         <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">

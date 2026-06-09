@@ -344,7 +344,7 @@ class NilaiService
         }
 
         if ($user->isDosen()) {
-            return $proposal->user && $proposal->user->nama_dosen_pa === $user->name;
+            return $proposal->user && $proposal->user->nama_dosen_pa === $user->username;
         }
 
         if ($user->isMentor()) {

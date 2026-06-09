@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class ProposalService
 {
@@ -21,6 +22,14 @@ class ProposalService
     public function store(User $user, array $data, ?UploadedFile $skmFile): ProposalMahasiswa
     {
         return DB::transaction(function () use ($user, $data, $skmFile) {
+            $dosenPa = trim((string) $user->nama_dosen_pa);
+
+            if ($dosenPa === '' || ! User::dosen()->where('username', $dosenPa)->exists()) {
+                throw ValidationException::withMessages([
+                    'dosen_pa' => 'NIP Dosen PA mahasiswa tidak valid. Hubungi admin untuk memperbarui data akun.',
+                ]);
+            }
+
             $this->ensureMentorAccountExists(
                 $data['email_mentor'],
                 $data['nama_mentor'],
@@ -45,7 +54,7 @@ class ProposalService
                 'hp_mentor' => $data['hp_mentor'],
                 'email_mentor' => $data['email_mentor'],
                 'email_perusahaan' => $data['email_perusahaan'] ?? null,
-                'dosen_pa' => $user->nama_dosen_pa,
+                'dosen_pa' => $dosenPa,
                 'skm' => $skmName,
             ]);
 
@@ -84,7 +93,7 @@ class ProposalService
             }
 
             // 3. Notify Dosen PA
-            $dosen = User::where('name', $mahasiswa->nama_dosen_pa)->where('role', UserRole::Dosen->value)->first();
+            $dosen = User::where('username', $mahasiswa->nama_dosen_pa)->where('role', UserRole::Dosen->value)->first();
             if ($dosen && $dosen->email) {
                 Mail::to($dosen->email)->send(new SystemNotification(
                     'Pengajuan PKL Baru - '.$mahasiswa->name,

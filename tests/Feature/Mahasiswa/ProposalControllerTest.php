@@ -15,11 +15,18 @@ class ProposalControllerTest extends TestCase
     use RefreshDatabase;
 
     protected User $mahasiswa;
+    protected User $dosen;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->mahasiswa = User::factory()->mahasiswa()->create();
+        
+        // Create dosen first for valid Dosen PA reference
+        $this->dosen = User::factory()->dosen()->create();
+        
+        $this->mahasiswa = User::factory()->mahasiswa()->create([
+            'nama_dosen_pa' => $this->dosen->username,
+        ]);
 
         OpeningHour::create([
             'open_time' => now()->subDays(7),
@@ -97,7 +104,9 @@ class ProposalControllerTest extends TestCase
 
     public function test_mahasiswa_cannot_update_other_proposal(): void
     {
-        $otherMahasiswa = User::factory()->mahasiswa()->create();
+        $otherMahasiswa = User::factory()->mahasiswa()->create([
+            'nama_dosen_pa' => $this->dosen->username,
+        ]);
         ProposalMahasiswa::factory()->create([
             'user_id' => $otherMahasiswa->id,
             'nim' => $otherMahasiswa->username,

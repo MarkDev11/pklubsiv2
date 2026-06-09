@@ -175,7 +175,7 @@ class ExportController extends Controller
 
             $query = $this->buildFilteredQuery($request, $export->category);
             
-            $chunk = $query->with('user')
+            $chunk = $query->with(['user', 'dosenPaUser'])
                           ->skip($validated['offset'])
                           ->take($validated['limit'])
                           ->get();
@@ -188,7 +188,7 @@ class ExportController extends Controller
                     'tempat_riset' => $proposal->tempat_riset,
                     'nama_mentor' => $proposal->nama_mentor,
                     'email_perusahaan' => $proposal->email_perusahaan,
-                    'dosen_pa' => $proposal->dosen_pa,
+                    'dosen_pa' => $proposal->dosenPaLabel(),
                     'nilai' => $proposal->nilai,
                     'penilai' => $proposal->penilai,
                     'updated_at' => $proposal->updated_at?->format('d/m/Y H:i') ?? '-',
@@ -327,14 +327,7 @@ class ExportController extends Controller
             : ProposalMahasiswa::msib();
 
         if ($request->filled('dosen_pa')) {
-            // Lookup dosen name from NIP (username)
-            $dosenName = User::where('username', $request->dosen_pa)
-                            ->where('role', 'dosen')
-                            ->value('name');
-            
-            if ($dosenName) {
-                $query->where('dosen_pa', $dosenName);
-            }
+            $query->byDosen($request->dosen_pa);
         }
 
         if ($request->filled('status_nilai')) {

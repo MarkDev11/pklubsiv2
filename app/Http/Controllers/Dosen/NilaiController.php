@@ -28,7 +28,7 @@ class NilaiController extends Controller
     {
         $user = $this->authenticatedUser();
         $query = ProposalMahasiswa::magang()
-            ->byDosen($user->name)
+            ->byDosen($user->username)
             ->with('user');
 
         // Search
@@ -75,7 +75,7 @@ class NilaiController extends Controller
     {
         $user = $this->authenticatedUser();
         $query = ProposalMahasiswa::msib()
-            ->byDosen($user->name)
+            ->byDosen($user->username)
             ->with('user');
 
         // Search
@@ -136,7 +136,7 @@ class NilaiController extends Controller
             $request->form_id,
             $request->nilai,
             $user,
-            fn ($q) => $q->whereHas('user', fn ($u) => $u->where('nama_dosen_pa', $user->name)),
+            fn ($q) => $q->whereHas('user', fn ($u) => $u->where('nama_dosen_pa', $user->username)),
         );
 
         if ($request->wantsJson()) {

@@ -65,8 +65,8 @@ class FileControllerTest extends TestCase
 
     public function test_dosen_can_access_their_students_files(): void
     {
-        $dosen = User::factory()->dosen()->create(['name' => 'Dr. Test']);
-        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'Dr. Test']);
+        $dosen = User::factory()->dosen()->create(['username' => 'DSNTEST001', 'name' => 'Dr. Test']);
+        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'DSNTEST001']);
         $proposal = ProposalMahasiswa::factory()->create([
             'user_id' => $mahasiswa->id,
             'nim' => $mahasiswa->username,
@@ -82,8 +82,8 @@ class FileControllerTest extends TestCase
 
     public function test_dosen_cannot_access_non_student_files(): void
     {
-        $dosen = User::factory()->dosen()->create(['name' => 'Dr. Test']);
-        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'Dr. Other']);
+        $dosen = User::factory()->dosen()->create(['username' => 'DSNTEST001', 'name' => 'Dr. Test']);
+        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'DSNOTHER001']);
         $proposal = ProposalMahasiswa::factory()->create([
             'user_id' => $mahasiswa->id,
             'nim' => $mahasiswa->username,

@@ -58,7 +58,7 @@ class LargeScaleDataSeeder extends Seeder
                 'updated_at' => now(),
             ];
             
-            $this->dosen[] = $name;
+            $this->dosen[] = $username;
             
             if (count($batch) >= 100) {
                 DB::table('users')->insert($batch);
@@ -138,7 +138,7 @@ class LargeScaleDataSeeder extends Seeder
         $proposalCounter = 0;
         
         for ($dosenIdx = 0; $dosenIdx < 400; $dosenIdx++) {
-            $dosenName = $this->dosen[$dosenIdx];
+            $dosenNip = $this->dosen[$dosenIdx];
             
             // Each dosen: 50 Magang + 50 MSIB
             for ($mhsNum = 0; $mhsNum < $mhsPerDosen; $mhsNum++) {
@@ -159,7 +159,7 @@ class LargeScaleDataSeeder extends Seeder
                     'email_bsi' => $nim . '@bsi.ac.id',
                     'password' => $this->hashedPassword,
                     'role' => 'mahasiswa',
-                    'nama_dosen_pa' => $dosenName,
+                    'nama_dosen_pa' => $dosenNip,
                     'jenis' => $jenis,
                     'kd_lokal' => rand(10, 15) . '.' . rand(1, 9) . chr(rand(65, 90)) . '.0' . rand(1, 5),
                     'otp_verified' => true,
@@ -188,7 +188,7 @@ class LargeScaleDataSeeder extends Seeder
                         $nim,
                         $name,
                         $isMSIB ? 'MSIB' : 'Magang',
-                        $dosenName,
+                        $dosenNip,
                         $mentor,
                         $status
                     );

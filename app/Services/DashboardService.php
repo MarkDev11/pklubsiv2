@@ -43,22 +43,22 @@ class DashboardService
     /**
      * @return array<string, int>
      */
-    public function getDosenStats(string $namaDosen): array
+    public function getDosenStats(string $nipDosen): array
     {
-        return Cache::remember("dashboard.dosen.{$namaDosen}", 60, function () use ($namaDosen) {
-            $jumlahMahasiswa = User::mahasiswa()->where('nama_dosen_pa', $namaDosen)->count();
+        return Cache::remember("dashboard.dosen.{$nipDosen}", 60, function () use ($nipDosen) {
+            $jumlahMahasiswa = User::mahasiswa()->where('nama_dosen_pa', $nipDosen)->count();
             $belumInputForm = User::mahasiswa()
-                ->where('nama_dosen_pa', $namaDosen)
+                ->where('nama_dosen_pa', $nipDosen)
                 ->whereDoesntHave('proposalMahasiswa')
                 ->count();
             $belumDinilai = ProposalMahasiswa::belumDinilai()
-                ->byDosen($namaDosen)
+                ->byDosen($nipDosen)
                 ->whereNotNull('lp')
                 ->whereNotNull('lpp')
                 ->whereNotNull('skp')
                 ->count();
             $sudahDinilai = ProposalMahasiswa::sudahDinilai()
-                ->byDosen($namaDosen)
+                ->byDosen($nipDosen)
                 ->count();
 
             return [
@@ -107,7 +107,7 @@ class DashboardService
         }
 
         return $list ?: Cache::remember($key, 120, fn () => User::mahasiswa()
-            ->where('nama_dosen_pa', $user->name)
+            ->where('nama_dosen_pa', $user->username)
             ->orderBy('name')
             ->get()
         );

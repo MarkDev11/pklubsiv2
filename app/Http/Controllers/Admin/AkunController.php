@@ -67,7 +67,8 @@ class AkunController extends Controller
 
         $filtered = $query->count();
 
-        $rows = $query->orderBy($orderBy, $orderDir)
+        $rows = $query->with('dosenPa')
+            ->orderBy($orderBy, $orderDir)
             ->offset($start)
             ->limit($length)
             ->get();
@@ -80,7 +81,7 @@ class AkunController extends Controller
                 'name' => e($r->name),
                 'role' => $r->role,
                 'jenis' => $r->jenis,
-                'dosen_pa' => $r->nama_dosen_pa,
+                'dosen_pa' => $r->isMahasiswa() ? $r->dosenPaLabel() : null,
                 'kd_lokal' => $r->kd_lokal,
                 'encrypted_id' => encryptUrl($r->username),
                 'is_admin' => $r->isAdmin(),
@@ -97,7 +98,9 @@ class AkunController extends Controller
 
     public function create(): View
     {
-        return view('admin.akun.create');
+        $dosenList = User::dosen()->orderBy('name')->get(['name', 'username']);
+
+        return view('admin.akun.create', compact('dosenList'));
     }
 
     public function store(StoreAkunRequest $request): RedirectResponse
@@ -115,7 +118,9 @@ class AkunController extends Controller
         $username = decryptUrl($encrypted);
         $user = User::where('username', $username)->firstOrFail();
 
-        return view('admin.akun.edit', compact('user'));
+        $dosenList = User::dosen()->orderBy('name')->get(['name', 'username']);
+
+        return view('admin.akun.edit', compact('user', 'dosenList'));
     }
 
     public function update(UpdateAkunRequest $request, string $encrypted): RedirectResponse

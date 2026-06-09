@@ -14,7 +14,7 @@ class ScopedExportService
     public function create(User $user, Builder $query, string $category, string $type): Export
     {
         $type = $type === 'excel' ? 'excel' : 'pdf';
-        $records = $query->with('user')->get();
+        $records = $query->with(['user', 'dosenPaUser'])->get();
         $timestamp = now()->format('Ymd_His');
         $filename = "{$user->role->value}_{$category}_{$type}_{$timestamp}." . ($type === 'pdf' ? 'pdf' : 'csv');
         $path = "exports/{$filename}";
@@ -55,7 +55,7 @@ class ScopedExportService
 
     public function dosenQuery(User $user, string $category): Builder
     {
-        return $this->categoryQuery($category)->byDosen($user->name);
+        return $this->categoryQuery($category)->byDosen($user->username);
     }
 
     public function mentorQuery(User $user, string $category): Builder
@@ -84,7 +84,7 @@ class ScopedExportService
                 $record->tempat_riset,
                 $record->nama_mentor,
                 $record->email_perusahaan,
-                $record->dosen_pa,
+                $record->dosenPaLabel(),
                 $record->nilai,
                 $record->penilai,
                 $record->updated_at?->format('d/m/Y H:i'),

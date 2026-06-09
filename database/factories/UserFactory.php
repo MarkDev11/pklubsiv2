@@ -47,7 +47,7 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'role' => UserRole::Mahasiswa->value,
             'jenis' => 'Magang',
-            'nama_dosen_pa' => fake()->name(),
+            'nama_dosen_pa' => 'DSN000001',
             'kd_lokal' => strtoupper(fake()->lexify('???')),
         ]);
     }

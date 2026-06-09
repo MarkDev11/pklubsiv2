@@ -117,10 +117,16 @@
 
                         {{-- Dosen PA --}}
                         <div>
-                            <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Nama Dosen PA</label>
-                            <input type="text" name="nama_dosen_pa" value="{{ old('nama_dosen_pa') }}"
-                                   class="form-input w-full bg-white dark:bg-gray-800 border-indigo-200 dark:border-gray-600 rounded-lg text-sm"
-                                   placeholder="Nama Dosen">
+                            <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">NIP Dosen PA</label>
+                            <select name="nama_dosen_pa" class="form-input w-full bg-white dark:bg-gray-800 border-indigo-200 dark:border-gray-600 rounded-lg text-sm">
+                                <option value="">-- Pilih Dosen PA --</option>
+                                @foreach($dosenList as $dosen)
+                                    <option value="{{ $dosen->username }}" {{ old('nama_dosen_pa') === $dosen->username ? 'selected' : '' }}>
+                                        {{ $dosen->name }} (NIP: {{ $dosen->username }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('nama_dosen_pa') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
 

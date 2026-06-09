@@ -59,13 +59,13 @@ class UserServiceTest extends TestCase
             'name' => 'Test Mahasiswa',
             'username' => '12345678',
             'role' => UserRole::Mahasiswa->value,
-            'nama_dosen_pa' => 'Dr. Test Dosen',
+            'nama_dosen_pa' => 'DSNTEST001',
             'jenis' => 'Magang',
         ];
 
         $user = $this->userService->createAccount($data);
 
-        $this->assertEquals('Dr. Test Dosen', $user->nama_dosen_pa);
+        $this->assertEquals('DSNTEST001', $user->nama_dosen_pa);
         $this->assertEquals('Magang', $user->jenis);
     }
 

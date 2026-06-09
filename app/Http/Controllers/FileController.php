@@ -111,7 +111,7 @@ class FileController extends Controller
 
         if ($user->isDosen()) {
             $proposals = ProposalMahasiswa::whereHas('user', function ($q) use ($user) {
-                $q->where('nama_dosen_pa', $user->name);
+                $q->where('nama_dosen_pa', $user->username);
             })->get();
 
             return $proposals->flatMap(function ($proposal) {

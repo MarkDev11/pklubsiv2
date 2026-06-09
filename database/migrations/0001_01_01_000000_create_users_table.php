@@ -19,7 +19,7 @@ return new class() extends Migration
             $table->string('email_bsi')->nullable()->comment('Email BSI untuk Google OAuth');
             $table->string('password')->nullable();
             $table->enum('role', ['mahasiswa', 'dosen', 'mentor', 'admin'])->default('mahasiswa')->index();
-            $table->string('nama_dosen_pa', 100)->nullable()->comment('Nama dosen pembimbing akademik');
+            $table->string('nama_dosen_pa', 100)->nullable()->comment('NIP/username dosen pembimbing akademik');
             $table->enum('jenis', ['Magang', 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)'])->nullable();
             $table->string('kd_lokal', 15)->nullable();
             $table->string('phone', 20)->nullable()->comment('Nomor HP untuk WA notification');

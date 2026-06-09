@@ -40,7 +40,7 @@ class DatabaseSeeder extends Seeder
             'email_bsi' => 'ahmad.12345678@bsi.ac.id',
             'password' => 'mhs123',
             'role' => 'mahasiswa',
-            'nama_dosen_pa' => 'Dr. Budi Santoso',
+            'nama_dosen_pa' => '1234567890',
             'jenis' => 'Magang',
             'kd_lokal' => '12.7A.01',
             'otp_verified' => true,

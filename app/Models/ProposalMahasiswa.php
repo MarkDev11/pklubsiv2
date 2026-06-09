@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\ProposalMahasiswaFactory;
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -73,6 +74,15 @@ class ProposalMahasiswa extends Model implements Auditable
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function dosenPaUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dosen_pa', 'username')
+            ->where('role', UserRole::Dosen->value);
+    }
+
     // ---- Scopes ----
 
     /**
@@ -121,11 +131,22 @@ class ProposalMahasiswa extends Model implements Auditable
      * @param  Builder<ProposalMahasiswa>  $query
      * @return Builder<ProposalMahasiswa>
      */
-    public function scopeByDosen(Builder $query, string $namaDosen): Builder
+    public function scopeByDosen(Builder $query, string $nipDosen): Builder
     {
-        return $query->whereHas('user', function ($q) use ($namaDosen) {
-            $q->where('nama_dosen_pa', $namaDosen);
+        return $query->whereHas('user', function ($q) use ($nipDosen) {
+            $q->where('nama_dosen_pa', $nipDosen);
         });
+    }
+
+    public function dosenPaLabel(): string
+    {
+        if (! $this->dosen_pa) {
+            return '-';
+        }
+
+        $dosen = $this->relationLoaded('dosenPaUser') ? $this->dosenPaUser : null;
+
+        return $dosen ? $dosen->name.' (NIP: '.$dosen->username.')' : $this->dosen_pa;
     }
 
     /**

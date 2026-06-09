@@ -56,7 +56,7 @@
                         @if($user->nama_dosen_pa)
                         <div>
                             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Dosen PA</p>
-                            <p class="text-sm text-gray-900 dark:text-white">{{ $user->nama_dosen_pa }}</p>
+                            <p class="text-sm text-gray-900 dark:text-white">{{ $user->dosenPaLabel() }}</p>
                         </div>
                         @endif
                     </div>

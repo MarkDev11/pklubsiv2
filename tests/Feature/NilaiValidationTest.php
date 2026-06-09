@@ -64,8 +64,8 @@ class NilaiValidationTest extends TestCase
 
     public function test_dosen_save_nilai_below_75_is_rejected(): void
     {
-        $dosen = User::factory()->dosen()->create(['name' => 'Dr. Budi']);
-        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'Dr. Budi']);
+        $dosen = User::factory()->dosen()->create(['username' => 'DSNBUDI001', 'name' => 'Dr. Budi']);
+        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'DSNBUDI001']);
         $proposal = ProposalMahasiswa::factory()->magang()->create([
             'user_id' => $mahasiswa->id,
             'nilai' => 0,
@@ -84,8 +84,8 @@ class NilaiValidationTest extends TestCase
 
     public function test_dosen_save_nilai_in_passing_range_accepted_via_json(): void
     {
-        $dosen = User::factory()->dosen()->create(['name' => 'Dr. Budi']);
-        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'Dr. Budi']);
+        $dosen = User::factory()->dosen()->create(['username' => 'DSNBUDI001', 'name' => 'Dr. Budi']);
+        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'DSNBUDI001']);
         $proposal = ProposalMahasiswa::factory()->magang()->create([
             'user_id' => $mahasiswa->id,
             'nilai' => 0,

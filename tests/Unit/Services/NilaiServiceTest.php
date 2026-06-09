@@ -173,8 +173,8 @@ class NilaiServiceTest extends TestCase
 
     public function test_validates_dosen_ownership(): void
     {
-        $dosen = User::factory()->dosen()->create(['name' => 'Dr. Test']);
-        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'Dr. Test']);
+        $dosen = User::factory()->dosen()->create(['username' => 'DSNTEST001', 'name' => 'Dr. Test']);
+        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'DSNTEST001']);
         $proposal = ProposalMahasiswa::factory()->create(['user_id' => $mahasiswa->id]);
 
         $this->assertTrue($this->nilaiService->validateProposalOwnership($proposal, $dosen));
@@ -190,8 +190,8 @@ class NilaiServiceTest extends TestCase
 
     public function test_rejects_invalid_ownership(): void
     {
-        $dosen = User::factory()->dosen()->create(['name' => 'Dr. Wrong']);
-        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'Dr. Right']);
+        $dosen = User::factory()->dosen()->create(['username' => 'DSNWRONG001', 'name' => 'Dr. Wrong']);
+        $mahasiswa = User::factory()->mahasiswa()->create(['nama_dosen_pa' => 'DSNRIGHT001']);
         $proposal = ProposalMahasiswa::factory()->create(['user_id' => $mahasiswa->id]);
 
         $this->assertFalse($this->nilaiService->validateProposalOwnership($proposal, $dosen));

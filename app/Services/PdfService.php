@@ -37,13 +37,13 @@ class PdfService
 
         if ($scopedUser) {
             if ($scopedUser->isDosen()) {
-                $query->byDosen($scopedUser->name);
+                $query->byDosen($scopedUser->username);
             } elseif ($scopedUser->isMentor()) {
                 $query->where('email_mentor', $scopedUser->username);
             }
         }
 
-        $proposals = $query->with('user')->chunkMap(fn ($p) => $p, 500);
+        $proposals = $query->with(['user', 'dosenPaUser'])->chunkMap(fn ($p) => $p, 500);
 
         $pdf = Pdf::loadView("pdf.{$viewName}", [
             'user' => $scopedUser,

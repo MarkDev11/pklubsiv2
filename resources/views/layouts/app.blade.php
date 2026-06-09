@@ -557,7 +557,7 @@
                                     if ($incomplete > 0) $notifications[] = ['icon' => 'file-circle-xmark', 'text' => "$incomplete mahasiswa dokumen belum lengkap", 'color' => 'amber'];
                                     if ($ungraded > 0) $notifications[] = ['icon' => 'clipboard-question', 'text' => "$ungraded mahasiswa belum dinilai", 'color' => 'blue'];
                                 } elseif ($role === 'dosen') {
-                                    $myStudents = \App\Models\ProposalMahasiswa::whereHas('user', fn($q) => $q->where('nama_dosen_pa', auth()->user()->name));
+                                    $myStudents = \App\Models\ProposalMahasiswa::whereHas('user', fn($q) => $q->where('nama_dosen_pa', auth()->user()->username));
                                     $ungraded = $myStudents->clone()->where(function($q) { $q->whereNull('nilai')->orWhere('nilai', '<=', 0); })->count();
                                     if ($ungraded > 0) $notifications[] = ['icon' => 'clipboard-question', 'text' => "$ungraded mahasiswa bimbingan belum dinilai", 'color' => 'blue'];
                                 } elseif ($role === 'mentor') {

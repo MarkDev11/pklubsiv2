@@ -193,7 +193,7 @@
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Dosen Pembimbing Akademik</label>
                             <div class="relative">
                                 <i class="fa-solid fa-chalkboard-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                                <input type="text" value="{{ $user->nama_dosen_pa ?? '-' }}"
+                                <input type="text" value="{{ $user->dosenPaLabel() }}"
                                        class="w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-400 text-sm cursor-not-allowed"
                                        readonly>
                             </div>

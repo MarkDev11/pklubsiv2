@@ -19,17 +19,17 @@ class DataMahasiswaService
             : 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)';
 
         $sedangBerjalan = ProposalMahasiswa::$scopeMethod()
-            ->byDosen($dosen->name)
+            ->byDosen($dosen->username)
             ->where(fn ($q) => $q->whereNull('lp')->orWhereNull('lpp')->orWhereNull('skp'))
             ->with('user')->paginate(50, ['*'], 'berjalan');
 
         $laporanTuntas = ProposalMahasiswa::$scopeMethod()
-            ->byDosen($dosen->name)
+            ->byDosen($dosen->username)
             ->whereNotNull('lp')->whereNotNull('lpp')->whereNotNull('skp')
             ->with('user')->paginate(50, ['*'], 'tuntas');
 
         $belumInput = User::where('role', UserRole::Mahasiswa)
-            ->where('nama_dosen_pa', $dosen->name)
+            ->where('nama_dosen_pa', $dosen->username)
             ->where('jenis', $jenisFilter)
             ->whereDoesntHave('proposalMahasiswa')
             ->paginate(50, ['*'], 'belum');

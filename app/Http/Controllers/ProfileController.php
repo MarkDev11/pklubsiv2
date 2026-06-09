@@ -11,7 +11,9 @@ class ProfileController extends Controller
 {
     public function edit(): View
     {
-        return view('profile.edit', ['user' => $this->authenticatedUser()]);
+        $user = $this->authenticatedUser()->load('dosenPa');
+
+        return view('profile.edit', compact('user'));
     }
 
     public function update(ProfileUpdateRequest $request): RedirectResponse

@@ -19,7 +19,7 @@ class ProposalController extends Controller
 
     public function index(): View
     {
-        $user = $this->authenticatedUser();
+        $user = $this->authenticatedUser()->load('dosenPa');
         $proposal = ProposalMahasiswa::where('nim', $user->username)->first();
         $openingHours = OpeningHour::first();
 

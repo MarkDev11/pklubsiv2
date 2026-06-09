@@ -8,6 +8,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -83,6 +84,15 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail
         return $this->hasMany(ActivityLog::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function dosenPa(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'nama_dosen_pa', 'username')
+            ->where('role', UserRole::Dosen->value);
+    }
+
     // ---- Scopes ----
 
     /**
@@ -141,6 +151,17 @@ class User extends Authenticatable implements Auditable, MustVerifyEmail
     public function isMentor(): bool
     {
         return $this->role->value === UserRole::Mentor->value;
+    }
+
+    public function dosenPaLabel(): string
+    {
+        if (! $this->nama_dosen_pa) {
+            return '-';
+        }
+
+        $dosen = $this->relationLoaded('dosenPa') ? $this->dosenPa : null;
+
+        return $dosen ? $dosen->name.' (NIP: '.$dosen->username.')' : $this->nama_dosen_pa;
     }
 
     public function generateOtp(): void

@@ -32,7 +32,7 @@ class DataMahasiswaController extends Controller
     {
         $id = decryptUrl($encrypted);
         
-        $user = User::with('proposalMahasiswa')->findOrFail($id);
+        $user = User::with(['proposalMahasiswa', 'dosenPa'])->findOrFail($id);
         
         // Authorization: Mentor can only see their mentees
         abort_unless(
@@ -47,7 +47,7 @@ class DataMahasiswaController extends Controller
                 'email' => $user->email,
                 'email_bsi' => $user->email_bsi,
                 'phone' => $user->phone,
-                'nama_dosen_pa' => $user->nama_dosen_pa,
+                'nama_dosen_pa' => $user->dosenPaLabel(),
                 'jenis' => $user->jenis,
                 'kd_lokal' => $user->kd_lokal,
             ],

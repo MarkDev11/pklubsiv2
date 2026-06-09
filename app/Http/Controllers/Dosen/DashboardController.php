@@ -15,7 +15,7 @@ class DashboardController extends Controller
     public function index(): View
     {
         $user = $this->authenticatedUser();
-        $stats = $this->dashboardService->getDosenStats($user->name);
+        $stats = $this->dashboardService->getDosenStats($user->username);
         $deadline = $this->dashboardService->getOpeningHours();
 
         return view('dosen.dashboard', array_merge(

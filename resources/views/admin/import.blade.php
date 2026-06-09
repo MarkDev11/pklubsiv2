@@ -160,8 +160,8 @@
                                     <td class="px-4 py-3">
                                         <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-mono font-semibold text-xs border border-emerald-200 dark:border-emerald-800/30">E</span>
                                     </td>
-                                    <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">Nama Dosen PA</td>
-                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">(Jika mahasiswa)</td>
+                                    <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">NIP Dosen PA</td>
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">Username dosen, wajib jika mahasiswa</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td class="px-4 py-3">

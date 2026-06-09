@@ -44,7 +44,7 @@
                     <td>{{ $p->tempat_riset }}</td>
                     <td>{{ $p->nama_mentor }}</td>
                     <td>{{ $p->email_perusahaan }}</td>
-                    <td>{{ $p->dosen_pa }}</td>
+                    <td>{{ method_exists($p, 'dosenPaLabel') ? $p->dosenPaLabel() : ($p->dosen_pa ?? '-') }}</td>
                     <td><strong>{{ $p->nilai }}</strong></td>
                     <td>{{ $p->penilai ?? '-' }}</td>
                     <td>{{ is_string($p->updated_at ?? null) ? $p->updated_at : ($p->updated_at?->format('d/m/Y H:i') ?? '-') }}</td>

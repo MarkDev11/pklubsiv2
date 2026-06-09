@@ -48,7 +48,9 @@ class UserService
             return null;
         }
 
-        return $data['nama_dosen_pa'] ?? null;
+        $dosenPa = trim((string) ($data['nama_dosen_pa'] ?? ''));
+
+        return $dosenPa !== '' ? $dosenPa : null;
     }
 
     /**
@@ -68,6 +70,9 @@ class UserService
      */
     public function updateAccount(User $user, array $data): User
     {
+        $data['nama_dosen_pa'] = $this->resolveDosenPa($data);
+        $data['jenis'] = $this->resolveJenis($data);
+
         $user->update($data);
 
         return $user;

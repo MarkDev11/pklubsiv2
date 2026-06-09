@@ -36,11 +36,16 @@ class AkunControllerTest extends TestCase
 
     public function test_admin_can_create_akun(): void
     {
+        // Create a dosen first for mahasiswa Dosen PA reference
+        /** @var User $dosen */
+        $dosen = User::factory()->dosen()->create();
+
         $response = $this->actingAs($this->admin)->post(route('admin.akun.store'), [
             'name' => 'Test User',
             'username' => '12345678',
             'role' => 'mahasiswa',
             'password' => 'SecureP@ss1',
+            'nama_dosen_pa' => $dosen->username,
         ]);
 
         $response->assertRedirect(route('admin.akun.index'));

@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\PassingGradeOrZero;
+use App\Services\NilaiService;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SaveNilaiRequest extends FormRequest
@@ -12,7 +14,7 @@ class SaveNilaiRequest extends FormRequest
     }
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, mixed>>
      */
     public function rules(): array
     {
@@ -20,7 +22,7 @@ class SaveNilaiRequest extends FormRequest
             'form_id' => ['required', 'array'],
             'form_id.*' => ['required', 'integer'],
             'nilai' => ['required', 'array'],
-            'nilai.*' => ['required', 'integer', 'min:0', 'max:100'],
+            'nilai.*' => ['required', 'integer', new PassingGradeOrZero()],
         ];
     }
 
@@ -29,8 +31,11 @@ class SaveNilaiRequest extends FormRequest
         return [
             'form_id.required' => 'Data nilai wajib dipilih.',
             'nilai.required' => 'Nilai wajib diisi.',
-            'nilai.*.min' => 'Nilai minimal 0.',
-            'nilai.*.max' => 'Nilai maksimal 100.',
+            'nilai.*.integer' => 'Nilai harus berupa angka.',
+            'nilai.*.required' => sprintf(
+                'Nilai harus 0 (kosongkan) atau antara %d sampai 100.',
+                NilaiService::MIN_PASSING_GRADE,
+            ),
         ];
     }
 }

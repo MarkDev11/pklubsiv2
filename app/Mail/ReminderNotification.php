@@ -2,8 +2,8 @@
 
 namespace App\Mail;
 
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -15,12 +15,13 @@ class ReminderNotification extends Mailable
     use Queueable, SerializesModels;
 
     public string $name;
+
     public string $deadline;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(string $name, \Carbon\Carbon $deadline)
+    public function __construct(string $name, Carbon $deadline)
     {
         $this->name = $name;
         $this->deadline = $deadline->translatedFormat('d F Y H:i');

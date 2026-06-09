@@ -6,141 +6,103 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Login' }} — Sistem PKL UBSI</title>
     <link rel="icon" type="image/png" href="{{ asset('images/pkl_logo.png') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     @if(! (app()->environment(['local', 'testing']) && (bool) config('services.turnstile.bypass_local', false)))
-        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer
+                onerror="window.dispatchEvent(new CustomEvent('turnstile:failed'))"></script>
     @endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         [x-cloak] { display: none !important; }
 
+        /* Force light scheme on auth pages — abaikan toggle dark mode */
+        html, body { color-scheme: light; }
+
+        /* Background gradient: biru tua → biru muda */
         .login-bg {
-            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 35%, #3b82f6 65%, #60a5fa 100%);
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 35%, #2563eb 65%, #60a5fa 100%);
         }
 
-        /* Animated floating icons */
-        .float-icon {
-            position: absolute;
-            opacity: 0.12;
-            animation: floatUp linear infinite;
-            pointer-events: none;
-            font-size: 2rem;
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-            10% { opacity: 0.15; }
-            90% { opacity: 0.15; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+        /* Hexagon texture overlay */
+        .bg-hexagon {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.12'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34'/%3E%3C/g%3E%3C/svg%3E");
+            background-size: 56px 100px;
         }
 
-        /* Grid animation */
-        .grid-bg {
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-            background-size: 60px 60px;
-            animation: gridScroll 20s linear infinite;
-        }
-        @keyframes gridScroll {
-            0% { background-position: 0 0; }
-            100% { background-position: 60px 60px; }
-        }
-
-        /* Glow pulse */
-        .glow-orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            animation: glowPulse 6s ease-in-out infinite alternate;
-        }
-        @keyframes glowPulse {
-            0% { opacity: 0.2; transform: scale(1); }
-            100% { opacity: 0.35; transform: scale(1.2); }
-        }
-
-        /* Card glass */
+        /* Login card */
         .login-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
             box-shadow:
-                0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-                0 25px 50px -12px rgba(0, 0, 0, 0.25),
-                0 0 80px rgba(59, 130, 246, 0.1);
+                0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06),
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
-        /* Input focus glow */
+        /* Input focus */
         .login-input:focus {
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 20px rgba(59, 130, 246, 0.1);
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
 
-        /* Role card */
+        /* Role Card */
         .role-card {
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .role-card:hover {
-            transform: translateY(-2px);
-            background: rgba(255, 255, 255, 0.15) !important;
-        }
-        .role-card.active {
-            background: rgba(255, 255, 255, 0.95) !important;
-            border-color: rgba(255, 255, 255, 0.9) !important;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2), 0 0 0 2px rgba(59, 130, 246, 0.3);
-            transform: translateY(-2px);
+            transition: all 0.2s ease;
         }
 
-        /* Particle line */
-        .particle-line {
-            position: absolute;
-            width: 1px;
-            height: 100px;
-            background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.2), transparent);
-            animation: particleFall linear infinite;
+        .role-card:hover {
+            border-color: #3b82f6;
         }
-        @keyframes particleFall {
-            0% { transform: translateY(-100px); opacity: 0; }
-            50% { opacity: 1; }
-            100% { transform: translateY(100vh); opacity: 0; }
+
+        .role-card.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+
+        /* Button */
+        .btn-login {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .btn-login:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        }
+
+        /* Animation */
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .split-container {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
-<body class="font-sans antialiased login-bg min-h-screen flex items-center justify-center p-4">
+<body class="font-sans antialiased login-bg min-h-screen flex items-center justify-center p-4 lg:p-8">
 
-    {{-- Animated Background Layer --}}
-    <div class="fixed inset-0 -z-10">
-        {{-- Grid --}}
-        <div class="absolute inset-0 grid-bg"></div>
+    {{-- Hexagon Texture Overlay --}}
+    <div class="fixed inset-0 -z-10 bg-hexagon pointer-events-none"></div>
 
-        {{-- Glow Orbs --}}
-        <div class="glow-orb w-96 h-96 bg-blue-600" style="top: 10%; left: -10%;"></div>
-        <div class="glow-orb w-80 h-80 bg-indigo-500" style="bottom: 5%; right: -5%; animation-delay: 3s;"></div>
-        <div class="glow-orb w-64 h-64 bg-blue-400" style="top: 50%; left: 50%; transform: translate(-50%,-50%); animation-delay: 1.5s;"></div>
-
-        {{-- Floating PKL-themed icons --}}
-        <div class="float-icon" style="left: 5%; animation-duration: 18s; animation-delay: 0s;"><i class="fa-solid fa-briefcase"></i></div>
-        <div class="float-icon" style="left: 15%; animation-duration: 22s; animation-delay: 2s;"><i class="fa-solid fa-chart-bar"></i></div>
-        <div class="float-icon" style="left: 25%; animation-duration: 16s; animation-delay: 5s;"><i class="fa-solid fa-graduation-cap"></i></div>
-        <div class="float-icon" style="left: 35%; animation-duration: 24s; animation-delay: 1s;"><i class="fa-solid fa-clipboard-list"></i></div>
-        <div class="float-icon" style="left: 45%; animation-duration: 20s; animation-delay: 4s;"><i class="fa-solid fa-building"></i></div>
-        <div class="float-icon" style="left: 55%; animation-duration: 19s; animation-delay: 3s;"><i class="fa-solid fa-pen-to-square"></i></div>
-        <div class="float-icon" style="left: 65%; animation-duration: 23s; animation-delay: 6s;"><i class="fa-solid fa-desktop"></i></div>
-        <div class="float-icon" style="left: 75%; animation-duration: 17s; animation-delay: 2s;"><i class="fa-solid fa-file-lines"></i></div>
-        <div class="float-icon" style="left: 85%; animation-duration: 21s; animation-delay: 7s;"><i class="fa-solid fa-laptop-code"></i></div>
-        <div class="float-icon" style="left: 95%; animation-duration: 25s; animation-delay: 0.5s;"><i class="fa-solid fa-bullseye"></i></div>
-
-        {{-- Particle Lines --}}
-        <div class="particle-line" style="left: 10%; animation-duration: 8s; animation-delay: 0s;"></div>
-        <div class="particle-line" style="left: 30%; animation-duration: 12s; animation-delay: 2s;"></div>
-        <div class="particle-line" style="left: 50%; animation-duration: 10s; animation-delay: 4s;"></div>
-        <div class="particle-line" style="left: 70%; animation-duration: 9s; animation-delay: 1s;"></div>
-        <div class="particle-line" style="left: 90%; animation-duration: 11s; animation-delay: 3s;"></div>
-    </div>
-
-    {{-- Login Card --}}
-    <div class="w-full max-w-md animate-slide-up relative z-10">
+    {{-- Main Container --}}
+    <div class="w-full max-w-6xl animate-slide-up relative z-10">
         {{ $slot }}
     </div>
 

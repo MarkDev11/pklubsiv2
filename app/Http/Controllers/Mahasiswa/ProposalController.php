@@ -32,6 +32,13 @@ class ProposalController extends Controller
 
         $this->authorize('create', ProposalMahasiswa::class);
 
+        // Check for existing proposal by nim (natural key)
+        $existingProposal = ProposalMahasiswa::where('nim', $user->username)->first();
+        if ($existingProposal) {
+            return redirect()->route('mahasiswa.proposal.index')
+                ->with('error', 'Anda sudah memiliki proposal PKL. Silakan perbarui data yang ada.');
+        }
+
         $openingHours = OpeningHour::first();
 
         if ($openingHours && ! $openingHours->isPendaftaranBuka()) {
@@ -51,9 +58,15 @@ class ProposalController extends Controller
     public function update(UpdateProposalRequest $request): RedirectResponse
     {
         $user = $this->authenticatedUser();
-        $proposal = ProposalMahasiswa::where('user_id', $user->id)->firstOrFail();
+        $proposal = ProposalMahasiswa::where('nim', $user->username)->firstOrFail();
 
         $this->authorize('update', $proposal);
+
+        $openingHours = OpeningHour::first();
+
+        if ($openingHours && ! $openingHours->isPendaftaranBuka()) {
+            return back()->with('error', 'Periode input data PKL sedang ditutup.');
+        }
 
         $this->proposalService->update(
             $proposal,

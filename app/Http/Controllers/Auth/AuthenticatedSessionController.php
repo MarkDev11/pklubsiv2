@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Models\ActivityLog;
 use App\Models\User;
+use App\Services\MathCaptchaService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,15 +15,14 @@ use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
+    public function __construct(protected MathCaptchaService $mathCaptcha) {}
+
     /**
      * Tampilkan halaman login.
      */
     public function create(): View
     {
-        return view('auth.login', [
-            'turnstileSiteKey' => config('services.turnstile.site_key'),
-            'turnstileBypassLocal' => app()->environment(['local', 'testing']) && (bool) config('services.turnstile.bypass_local', false),
-        ]);
+        return view('auth.login', $this->loginViewData());
     }
 
     /**
@@ -52,10 +52,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function createAdmin(): View
     {
-        return view('auth.login-admin', [
-            'turnstileSiteKey' => config('services.turnstile.site_key'),
-            'turnstileBypassLocal' => app()->environment(['local', 'testing']) && (bool) config('services.turnstile.bypass_local', false),
-        ]);
+        return view('auth.login-admin', $this->loginViewData());
     }
 
     /**
@@ -90,5 +87,19 @@ class AuthenticatedSessionController extends Controller
         }
 
         return redirect()->route('login');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function loginViewData(): array
+    {
+        $bypassLocal = app()->environment(['local', 'testing']) && (bool) config('services.turnstile.bypass_local', false);
+
+        return [
+            'turnstileSiteKey' => config('services.turnstile.site_key'),
+            'turnstileBypassLocal' => $bypassLocal,
+            'mathCaptcha' => $bypassLocal ? null : $this->mathCaptcha->generate(),
+        ];
     }
 }

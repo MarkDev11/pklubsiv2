@@ -47,7 +47,7 @@ class ProposalPolicy
 
     public function update(User $user, ProposalMahasiswa $proposal): bool
     {
-        return $user->role === UserRole::Mahasiswa && $proposal->user_id === $user->id && is_null($proposal->nilai);
+        return $user->role === UserRole::Mahasiswa && $proposal->user_id === $user->id && $proposal->nilai <= 0;
     }
 
     /**
@@ -68,7 +68,7 @@ class ProposalPolicy
      */
     public function uploadLaporan(User $user, ProposalMahasiswa $proposal): bool
     {
-        return $user->role === UserRole::Mahasiswa && $proposal->user_id === $user->id && is_null($proposal->nilai);
+        return $user->role === UserRole::Mahasiswa && $proposal->user_id === $user->id && $proposal->nilai <= 0;
     }
 
     /**
@@ -76,6 +76,6 @@ class ProposalPolicy
      */
     public function resetLaporan(User $user, ProposalMahasiswa $proposal): bool
     {
-        return $user->role === UserRole::Mahasiswa && $proposal->user_id === $user->id && is_null($proposal->nilai);
+        return $user->role === UserRole::Mahasiswa && $proposal->user_id === $user->id && $proposal->nilai <= 0;
     }
 }

@@ -58,6 +58,14 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "build:production": [
+            "@composer install --no-dev --optimize-autoloader --classmap-authoritative",
+            "@php artisan config:clear",
+            "@php artisan route:clear",
+            "@php artisan view:clear",
+            "npm ci",
+            "npm run build"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

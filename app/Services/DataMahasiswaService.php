@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\UserRole;
 use App\Models\ProposalMahasiswa;
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
 
 class DataMahasiswaService
 {

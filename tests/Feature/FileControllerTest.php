@@ -25,7 +25,7 @@ class FileControllerTest extends TestCase
 
         Storage::disk('public')->put('uploads/test_laporan.pdf', 'content');
 
-        $response = $this->actingAs($admin)->get(route('files.serve', 'test_laporan.pdf'));
+        $response = $this->actingAs($admin)->get(route('files.serve', encryptUrl('test_laporan.pdf')));
 
         $response->assertOk();
     }
@@ -41,7 +41,7 @@ class FileControllerTest extends TestCase
 
         Storage::disk('public')->put('uploads/own_laporan.pdf', 'content');
 
-        $response = $this->actingAs($mahasiswa)->get(route('files.serve', 'own_laporan.pdf'));
+        $response = $this->actingAs($mahasiswa)->get(route('files.serve', encryptUrl('own_laporan.pdf')));
 
         $response->assertOk();
     }
@@ -58,7 +58,7 @@ class FileControllerTest extends TestCase
 
         Storage::disk('public')->put('uploads/other_laporan.pdf', 'content');
 
-        $response = $this->actingAs($mahasiswa)->get(route('files.serve', 'other_laporan.pdf'));
+        $response = $this->actingAs($mahasiswa)->get(route('files.serve', encryptUrl('other_laporan.pdf')));
 
         $response->assertForbidden();
     }
@@ -75,7 +75,7 @@ class FileControllerTest extends TestCase
 
         Storage::disk('public')->put('uploads/student_laporan.pdf', 'content');
 
-        $response = $this->actingAs($dosen)->get(route('files.serve', 'student_laporan.pdf'));
+        $response = $this->actingAs($dosen)->get(route('files.serve', encryptUrl('student_laporan.pdf')));
 
         $response->assertOk();
     }
@@ -92,7 +92,7 @@ class FileControllerTest extends TestCase
 
         Storage::disk('public')->put('uploads/non_student_laporan.pdf', 'content');
 
-        $response = $this->actingAs($dosen)->get(route('files.serve', 'non_student_laporan.pdf'));
+        $response = $this->actingAs($dosen)->get(route('files.serve', encryptUrl('non_student_laporan.pdf')));
 
         $response->assertForbidden();
     }
@@ -107,7 +107,7 @@ class FileControllerTest extends TestCase
 
         Storage::disk('public')->put('uploads/mentee_laporan.pdf', 'content');
 
-        $response = $this->actingAs($mentor)->get(route('files.serve', 'mentee_laporan.pdf'));
+        $response = $this->actingAs($mentor)->get(route('files.serve', encryptUrl('mentee_laporan.pdf')));
 
         $response->assertOk();
     }
@@ -116,7 +116,7 @@ class FileControllerTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $response = $this->actingAs($admin)->get(route('files.serve', '../../../etc/passwd'));
+        $response = $this->actingAs($admin)->get(route('files.serve', encryptUrl('../../../etc/passwd')));
 
         // Could be 403 (blocked) or 404 (route param encoding)
         $this->assertContains($response->status(), [403, 404]);
@@ -126,7 +126,7 @@ class FileControllerTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $response = $this->actingAs($admin)->get(route('files.serve', 'path/to/file.pdf'));
+        $response = $this->actingAs($admin)->get(route('files.serve', encryptUrl('path/to/file.pdf')));
 
         // Could be 403 (blocked) or 404 (route param encoding)
         $this->assertContains($response->status(), [403, 404]);
@@ -136,7 +136,7 @@ class FileControllerTest extends TestCase
     {
         $admin = User::factory()->admin()->create();
 
-        $response = $this->actingAs($admin)->get(route('files.serve', 'nonexistent.pdf'));
+        $response = $this->actingAs($admin)->get(route('files.serve', encryptUrl('nonexistent.pdf')));
 
         $response->assertNotFound();
     }
@@ -145,7 +145,7 @@ class FileControllerTest extends TestCase
     {
         Storage::disk('public')->put('uploads/test.pdf', 'content');
 
-        $response = $this->get(route('files.serve', 'test.pdf'));
+        $response = $this->get(route('files.serve', encryptUrl('test.pdf')));
 
         // Guest is redirected to login (302) or forbidden (403)
         $this->assertContains($response->status(), [302, 403]);

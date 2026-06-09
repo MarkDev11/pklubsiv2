@@ -15,7 +15,7 @@ class ErrorLogPolicyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->policy = new ErrorLogPolicy;
+        $this->policy = new ErrorLogPolicy();
     }
 
     #[Test]
@@ -42,7 +42,7 @@ class ErrorLogPolicyTest extends TestCase
     public function admin_can_view_error_log(): void
     {
         $admin = User::factory()->admin()->make();
-        $log = new ErrorLog;
+        $log = new ErrorLog();
 
         $this->assertTrue($this->policy->view($admin, $log));
     }
@@ -51,7 +51,7 @@ class ErrorLogPolicyTest extends TestCase
     public function non_admin_cannot_view_error_log(): void
     {
         $mahasiswa = User::factory()->mahasiswa()->make();
-        $log = new ErrorLog;
+        $log = new ErrorLog();
 
         $this->assertFalse($this->policy->view($mahasiswa, $log));
     }
@@ -60,7 +60,7 @@ class ErrorLogPolicyTest extends TestCase
     public function admin_can_delete_error_log(): void
     {
         $admin = User::factory()->admin()->make();
-        $log = new ErrorLog;
+        $log = new ErrorLog();
 
         $this->assertTrue($this->policy->delete($admin, $log));
     }

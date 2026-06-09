@@ -47,7 +47,7 @@
                     <td>{{ $p->dosen_pa }}</td>
                     <td><strong>{{ $p->nilai }}</strong></td>
                     <td>{{ $p->penilai ?? '-' }}</td>
-                    <td>{{ $p->updated_at?->format('d/m/Y H:i') }}</td>
+                    <td>{{ is_string($p->updated_at ?? null) ? $p->updated_at : ($p->updated_at?->format('d/m/Y H:i') ?? '-') }}</td>
                 </tr>
             @empty
                 <tr><td colspan="11">Tidak ada data.</td></tr>

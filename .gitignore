@@ -21,6 +21,8 @@ deploy-pklubsiv2.zip
 /public/storage
 /bootstrap/cache/*.php
 /database/*.sqlite
+/database.sqlite
+/public/uploads
 /storage/framework/views/*
 /storage/framework/sessions/*
 /storage/framework/cache/data/*

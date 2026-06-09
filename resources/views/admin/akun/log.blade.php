@@ -12,7 +12,7 @@
         </div>
 
         {{-- User Header --}}
-        <div class="rounded-2xl border border-gray-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden shadow-sm">
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
             <div class="bg-gradient-to-r from-primary-500 to-primary-700 px-6 py-6 relative">
                 <div class="flex items-center justify-between relative z-10">
                     <div class="flex items-center gap-4">
@@ -41,16 +41,16 @@
 
         {{-- Stats Strip --}}
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            <div class="rounded-xl border border-gray-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-4 text-center shadow-sm">
+            <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-center shadow-sm">
                 <p class="text-2xl font-extrabold text-gray-900 dark:text-white">{{ $logs->count() }}</p>
                 <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mt-0.5">Total Aktivitas</p>
             </div>
             @if($logs->count())
-            <div class="rounded-xl border border-gray-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-4 text-center shadow-sm">
+            <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-center shadow-sm">
                 <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $logs->first()->waktu?->format('d M Y') }}</p>
                 <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mt-0.5">Aktivitas Terakhir</p>
             </div>
-            <div class="rounded-xl border border-gray-200 dark:border-surface-700 bg-white dark:bg-surface-800 p-4 text-center shadow-sm">
+            <div class="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-center shadow-sm">
                 <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $logs->last()->waktu?->format('d M Y') }}</p>
                 <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mt-0.5">Aktivitas Pertama</p>
             </div>
@@ -58,12 +58,12 @@
         </div>
 
         {{-- Log Table --}}
-        <div class="rounded-2xl border border-gray-200 dark:border-surface-700 overflow-hidden shadow-sm">
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             @if($logs->count())
             <div class="overflow-x-auto">
                 <table class="w-full text-sm">
                     <thead>
-                        <tr class="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-surface-800 dark:to-surface-900 border-b-2 border-gray-200 dark:border-surface-600">
+                        <tr class="bg-gradient-to-r from-slate-50 to-gray-50 dark:from-surface-800 dark:to-surface-900 border-b-2 border-gray-200 dark:border-gray-600">
                             <th class="px-5 py-3.5 text-left font-bold text-gray-500 dark:text-gray-400 uppercase text-[11px] tracking-wider w-14">#</th>
                             <th class="px-5 py-3.5 text-left font-bold text-gray-500 dark:text-gray-400 uppercase text-[11px] tracking-wider">Aktivitas</th>
                             <th class="px-5 py-3.5 text-left font-bold text-gray-500 dark:text-gray-400 uppercase text-[11px] tracking-wider w-48">Waktu</th>
@@ -72,7 +72,7 @@
                     </thead>
                     <tbody>
                         @foreach($logs as $i => $log)
-                        <tr class="border-b border-gray-100 dark:border-surface-700/50 hover:bg-blue-50/50 dark:hover:bg-primary-900/10 transition-colors {{ $i % 2 === 0 ? 'bg-white dark:bg-surface-800' : 'bg-gray-50/70 dark:bg-surface-800/50' }}">
+                        <tr class="border-b border-gray-100 dark:border-gray-700/50 hover:bg-blue-50/50 dark:hover:bg-primary-900/10 transition-colors {{ $i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/70 dark:bg-gray-800/50' }}">
                             <td class="px-5 py-3 text-gray-400 font-medium text-xs">{{ $i + 1 }}</td>
                             <td class="px-5 py-3">
                                 <div class="flex items-center gap-3">
@@ -86,7 +86,7 @@
                                 <i class="fa-regular fa-calendar text-[10px] mr-1"></i> {{ $log->waktu?->format('d M Y H:i:s') }}
                             </td>
                             <td class="px-5 py-3">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-surface-700 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 text-xs font-medium text-gray-500 dark:text-gray-400">
                                     {{ $log->waktu?->diffForHumans() }}
                                 </span>
                             </td>
@@ -95,15 +95,15 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-5 py-3 border-t-2 border-gray-200 dark:border-surface-600 bg-gray-50 dark:bg-surface-900 text-xs text-gray-500 dark:text-gray-400 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="px-5 py-3 border-t-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-xs text-gray-500 dark:text-gray-400 flex flex-col sm:flex-row justify-between items-center gap-3">
                 <span>Menampilkan <strong>{{ $logs->count() }}</strong> dari <strong>{{ $logs->total() }}</strong> log aktivitas untuk <strong>{{ $user->name }}</strong></span>
                 <div class="mt-2 sm:mt-0">
                     {{ $logs->links() }}
                 </div>
             </div>
             @else
-            <div class="text-center py-16 bg-white dark:bg-surface-800">
-                <div class="w-16 h-16 bg-gray-100 dark:bg-surface-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <div class="text-center py-16 bg-white dark:bg-gray-800">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
                     <i class="fa-solid fa-inbox text-xl text-gray-400"></i>
                 </div>
                 <p class="text-gray-500 dark:text-gray-400 font-medium">Belum ada log aktivitas</p>

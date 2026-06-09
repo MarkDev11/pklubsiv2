@@ -1,187 +1,276 @@
 <x-app-layout>
     <x-slot name="title">Mahasiswa PKL</x-slot>
-    
-    <div class="space-y-6 animate-fade-in pb-10" x-data="{ tab: 'berjalan', search: '' }">
 
-        {{-- Page Header --}}
-        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+    <div class="space-y-6" x-data="{
+        tab: 'berjalan',
+        search: '',
+        modalOpen: false,
+        modalData: null,
+        modalLoading: false,
+        modalError: null,
+        detailCache: {},
+        async showDetail(encryptedId) {
+            const cached = this.detailCache[encryptedId];
+            if (cached && (Date.now() - cached.timestamp < 300000)) {
+                this.modalData = cached.data;
+                this.modalOpen = true;
+                return;
+            }
+            this.modalOpen = true;
+            this.modalLoading = true;
+            this.modalError = null;
+            this.modalData = null;
+            try {
+                const response = await fetch(`/mentor/mahasiswa/${encryptedId}/detail`);
+                if (!response.ok) throw new Error('Gagal memuat data');
+                const data = await response.json();
+                this.modalData = data;
+                this.detailCache[encryptedId] = { data, timestamp: Date.now() };
+            } catch (error) {
+                this.modalError = error.message;
+            } finally {
+                this.modalLoading = false;
+            }
+        }
+    }">
+
+        {{-- Header --}}
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
-                <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-users-viewfinder text-xl"></i>
-                    </div>
-                    Data Mahasiswa PKL (Magang)
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Daftar peserta magang institusi yang berada di bawah bimbingan teknis Anda.</p>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Mahasiswa Bimbingan PKL — Magang Reguler</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Daftar peserta magang yang berada di bawah bimbingan teknis Anda.</p>
             </div>
-            
-            {{-- Modern Alpine Tabs Nav & Search --}}
-            <div class="flex flex-col lg:flex-row gap-3 w-full xl:w-auto">
-                <div class="bg-gray-100/80 dark:bg-surface-800 p-1.5 rounded-2xl flex flex-nowrap overflow-x-auto custom-scrollbar gap-1 shadow-sm border border-gray-200/50 dark:border-surface-700 max-w-full">
-                    <button @click="tab = 'berjalan'" :class="tab === 'berjalan' ? 'bg-white dark:bg-surface-600 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'" class="px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-spinner" :class="tab === 'berjalan' ? 'animate-spin-slow' : ''"></i> Berjalan
-                        <span class="bg-gray-100 dark:bg-surface-900 px-2 py-0.5 rounded text-xs ml-1">{{ $sedangBerjalan->count() }}</span>
-                    </button>
-                    <button @click="tab = 'perlu_nilai'" :class="tab === 'perlu_nilai' ? 'bg-white dark:bg-surface-600 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'" class="px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-clipboard-list"></i> Perlu Nilai
-                        <span class="bg-gray-100 dark:bg-surface-900 px-2 py-0.5 rounded text-xs ml-1">{{ $perluNilai->count() }}</span>
-                    </button>
-                    <button @click="tab = 'selesai'" :class="tab === 'selesai' ? 'bg-white dark:bg-surface-600 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'" class="px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 whitespace-nowrap">
-                        <i class="fa-solid fa-star"></i> Selesai
-                        <span class="bg-gray-100 dark:bg-surface-900 px-2 py-0.5 rounded text-xs ml-1">{{ $telahDinilai->count() }}</span>
+
+            <div class="flex flex-col sm:flex-row gap-2">
+                <div class="relative">
+                    <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                    <input type="text" x-model="search" placeholder="Cari nama atau NIM..."
+                           class="pl-10 pr-10 py-2 w-full sm:w-64 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button x-show="search" @click="search = ''" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600">
+                        <i class="fa-solid fa-times"></i>
                     </button>
                 </div>
-                
-                {{-- Search & Export --}}
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <div class="relative flex-1 sm:flex-initial">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <i class="fa-solid fa-search text-gray-400"></i>
-                        </div>
-                        <input type="text" x-model="search" placeholder="Cari nama atau NIM..." class="pl-10 pr-4 py-2 w-full sm:w-64 bg-white dark:bg-surface-800 border border-gray-200 dark:border-surface-700 rounded-xl text-sm focus:ring-indigo-500 focus:border-indigo-500 dark:text-white shadow-sm transition-all h-full outline-none">
-                    </div>
-                    
-                    <a href="{{ route('mentor.pdf.pkl') }}" target="_blank" class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-md shadow-indigo-500/20 transition-all active:scale-95 whitespace-nowrap">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Rekap</span>
-                    </a>
-                </div>
+                <a href="{{ route('mentor.pdf.pkl') }}" target="_blank"
+                   class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span>Cetak Rekap</span>
+                </a>
             </div>
         </div>
 
-        {{-- Main Container --}}
-        <div class="bg-white dark:bg-surface-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-surface-700 overflow-hidden relative">
-            
-            {{-- TAB 1: SEDANG BERJALAN --}}
-            <div x-show="tab === 'berjalan'" x-transition.opacity.duration.300ms class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 dark:bg-surface-900 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
-                        <tr>
-                            <th class="px-6 py-4 rounded-tl-xl w-16">No</th>
-                            <th class="px-6 py-4">Informasi Mahasiswa</th>
-                            <th class="px-6 py-4">Judul PKL</th>
-                            <th class="px-6 py-4 text-center">Status Berkas</th>
-                            <th class="px-6 py-4 text-center rounded-tr-xl">Status</th>
+        {{-- Tab Switcher --}}
+        <div class="flex flex-wrap gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-md">
+            <button @click="tab = 'berjalan'"
+                    :class="tab === 'berjalan' ? 'bg-white dark:bg-gray-900 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                    class="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                <i class="fa-solid fa-spinner"></i> Berjalan
+                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 tabular-nums">{{ $sedangBerjalan->count() }}</span>
+            </button>
+            <button @click="tab = 'perlu_nilai'"
+                    :class="tab === 'perlu_nilai' ? 'bg-white dark:bg-gray-900 text-amber-600 dark:text-amber-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                    class="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                <i class="fa-solid fa-clipboard-list"></i> Perlu Nilai
+                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 tabular-nums">{{ $perluNilai->count() }}</span>
+            </button>
+            <button @click="tab = 'selesai'"
+                    :class="tab === 'selesai' ? 'bg-white dark:bg-gray-900 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
+                    class="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                <i class="fa-solid fa-check-double"></i> Selesai
+                <span class="text-xs px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-700 tabular-nums">{{ $telahDinilai->count() }}</span>
+            </button>
+        </div>
+
+        {{-- Reusable empty-state component as anonymous markup repeated --}}
+
+        {{-- Tab: Berjalan --}}
+        <div x-show="tab === 'berjalan'" x-transition.opacity class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-16">No</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Mahasiswa</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Tempat Riset</th>
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Kelengkapan</th>
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-20">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-surface-700">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @forelse($sedangBerjalan as $i => $p)
-                        <tr x-show="search === '' || $el.dataset.search.includes(search.toLowerCase())" data-search="{{ strtolower(e($p->nama . ' ' . $p->nim . ' ' . $p->judul_pkl)) }}" class="hover:bg-gray-50/50 dark:hover:bg-surface-800/50 transition-colors group">
-                            <td class="px-6 py-4 text-center font-bold text-gray-400">{{ $i+1 }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-user-graduate"></i></div>
-                                    <div><p class="font-bold text-gray-900 dark:text-white">{{ $p->nama }}</p><p class="text-xs font-mono text-gray-500 mt-0.5">{{ $p->nim }}</p></div>
+                        <tr x-show="(tab === 'berjalan') && (search === '' || $el.dataset.search.includes(search.toLowerCase()))"
+                            data-search="{{ strtolower(e($p->nama . ' ' . $p->nim . ' ' . $p->tempat_riset)) }}"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 tabular-nums">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-gray-900 dark:text-white">{{ $p->nama }}</div>
+                                <div class="font-mono text-xs text-blue-600 dark:text-blue-400 mt-0.5">{{ $p->nim }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[240px]">
+                                    <i class="fa-solid fa-building text-gray-400 text-xs mr-1"></i> {{ $p->tempat_riset }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 font-medium text-gray-700 dark:text-gray-300 italic">"{{ $p->judul_pkl }}"</td>
-                            <td class="px-6 py-4">
-                                <div class="flex flex-wrap items-center justify-center gap-1.5">
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $p->lp ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-400 border-rose-100' }}">LP</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $p->lpp ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-400 border-rose-100' }}">LPP</span>
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border {{ $p->skp ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-400 border-rose-100' }}">SKP</span>
+                            <td class="px-4 py-3">
+                                <div class="flex justify-center gap-1.5">
+                                    <span @class([
+                                        'px-2 py-1 rounded text-xs font-medium border',
+                                        'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30' => $p->lp,
+                                        'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30' => !$p->lp,
+                                    ])>LP</span>
+                                    <span @class([
+                                        'px-2 py-1 rounded text-xs font-medium border',
+                                        'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30' => $p->lpp,
+                                        'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30' => !$p->lpp,
+                                    ])>LPP</span>
+                                    <span @class([
+                                        'px-2 py-1 rounded text-xs font-medium border',
+                                        'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30' => $p->skp,
+                                        'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30' => !$p->skp,
+                                    ])>SKP</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-3 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-widest border border-indigo-100 dark:border-indigo-800/30">Aktif</span>
+                            <td class="px-4 py-3 text-center">
+                                <button @click="showDetail('{{ encryptUrl($p->user_id) }}')" 
+                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                        title="Lihat Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" class="px-6 py-16 text-center text-gray-500">Tidak ada mahasiswa yang sedang berjalan.</td></tr>
+                        <tr>
+                            <td colspan="5">
+                                <div class="p-12 text-center">
+                                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                        <i class="fa-solid fa-inbox text-2xl text-gray-400"></i>
+                                    </div>
+                                    <p class="text-gray-500 dark:text-gray-400 font-medium">Tidak ada mahasiswa magang yang sedang berjalan.</p>
+                                </div>
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            {{-- TAB 2: PERLU DINILAI --}}
-            <div x-cloak x-show="tab === 'perlu_nilai'" x-transition.opacity.duration.300ms class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 dark:bg-surface-900 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
-                        <tr>
-                            <th class="px-6 py-4 rounded-tl-xl w-16">No</th>
-                            <th class="px-6 py-4">Informasi Mahasiswa</th>
-                            <th class="px-6 py-4">Laporan Akhir</th>
-                            <th class="px-6 py-4 text-center">Validasi Berkas</th>
-                            <th class="px-6 py-4 text-right rounded-tr-xl">Tindakan</th>
+        {{-- Tab: Perlu Nilai --}}
+        <div x-cloak x-show="tab === 'perlu_nilai'" x-transition.opacity class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-16">No</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Mahasiswa</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Tempat Riset</th>
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Status</th>
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-20">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-surface-700">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @forelse($perluNilai as $i => $p)
-                        <tr x-show="search === '' || $el.dataset.search.includes(search.toLowerCase())" data-search="{{ strtolower(e($p->nama . ' ' . $p->nim)) }}" class="hover:bg-amber-50/30 dark:hover:bg-amber-900/10 transition-colors group">
-                            <td class="px-6 py-4 text-center font-bold text-gray-400">{{ $i+1 }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-amber-50 dark:bg-amber-900/20 text-amber-600 flex items-center justify-center shrink-0 border border-amber-100 dark:border-amber-800/30"><i class="fa-solid fa-user-graduate"></i></div>
-                                    <div><p class="font-bold text-gray-900 dark:text-white">{{ $p->nama }}</p><p class="text-xs font-mono text-gray-500 mt-0.5">{{ $p->nim }}</p></div>
+                        <tr x-show="(tab === 'perlu_nilai') && (search === '' || $el.dataset.search.includes(search.toLowerCase()))"
+                            data-search="{{ strtolower(e($p->nama . ' ' . $p->nim . ' ' . $p->tempat_riset)) }}"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 tabular-nums">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-gray-900 dark:text-white">{{ $p->nama }}</div>
+                                <div class="font-mono text-xs text-blue-600 dark:text-blue-400 mt-0.5">{{ $p->nim }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[240px]">
+                                    <i class="fa-solid fa-building text-gray-400 text-xs mr-1"></i> {{ $p->tempat_riset }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4">
-                                <p class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-tighter">Sudah Lengkap (3/3)</p>
-                                <p class="text-[10px] text-emerald-500 font-bold mt-0.5">Siap Dinilai</p>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded bg-emerald-500 text-white text-[10px] font-bold shadow-sm">
-                                    <i class="fa-solid fa-check-circle"></i> VERIFIED
+                            <td class="px-4 py-3 text-center">
+                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium border bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30">
+                                    <i class="fa-solid fa-hourglass-half text-[10px]"></i> Menunggu Penilaian
                                 </span>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <a href="{{ route('mentor.nilai.pkl') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all shadow-md shadow-amber-500/20 active:scale-95">
-                                    <i class="fa-solid fa-star"></i> Beri Nilai
-                                </a>
+                            <td class="px-4 py-3 text-center">
+                                <button @click="showDetail('{{ encryptUrl($p->user_id) }}')" 
+                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                        title="Lihat Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" class="px-6 py-16 text-center text-gray-500">Semua mahasiswa yang tuntas sudah Anda nilai.</td></tr>
+                        <tr>
+                            <td colspan="5">
+                                <div class="p-12 text-center">
+                                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                        <i class="fa-solid fa-clipboard-check text-2xl text-gray-400"></i>
+                                    </div>
+                                    <p class="text-gray-500 dark:text-gray-400 font-medium">Tidak ada mahasiswa yang memerlukan penilaian.</p>
+                                </div>
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
+        </div>
 
-            {{-- TAB 3: TELAH DINILAI (SELESAI) --}}
-            <div x-cloak x-show="tab === 'selesai'" x-transition.opacity.duration.300ms class="overflow-x-auto custom-scrollbar">
-                <table class="w-full text-sm text-left">
-                    <thead class="bg-gray-50 dark:bg-surface-900 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
-                        <tr>
-                            <th class="px-6 py-4 rounded-tl-xl w-16">No</th>
-                            <th class="px-6 py-4">Identitas Akademik</th>
-                            <th class="px-6 py-4">Judul PKL</th>
-                            <th class="px-6 py-4 text-center">Skor Akhir</th>
-                            <th class="px-6 py-4 text-center rounded-tr-xl">Predikat</th>
+        {{-- Tab: Selesai --}}
+        <div x-cloak x-show="tab === 'selesai'" x-transition.opacity class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-16">No</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Mahasiswa</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Tempat Riset</th>
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Nilai</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Penilai</th>
+                            <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-20">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-surface-700">
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         @forelse($telahDinilai as $i => $p)
-                        <tr x-show="search === '' || $el.dataset.search.includes(search.toLowerCase())" data-search="{{ strtolower(e($p->nama . ' ' . $p->nim)) }}" class="hover:bg-emerald-50/30 dark:hover:bg-emerald-900/10 transition-colors group">
-                            <td class="px-6 py-4 text-center font-bold text-gray-400">{{ $i+1 }}</td>
-                            <td class="px-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-100 dark:border-emerald-800/30"><i class="fa-solid fa-medal"></i></div>
-                                    <div><p class="font-bold text-gray-900 dark:text-white">{{ $p->nama }}</p><p class="text-xs font-mono text-gray-500 mt-0.5">{{ $p->nim }}</p></div>
+                        <tr x-show="(tab === 'selesai') && (search === '' || $el.dataset.search.includes(search.toLowerCase()))"
+                            data-search="{{ strtolower(e($p->nama . ' ' . $p->nim . ' ' . $p->tempat_riset)) }}"
+                            class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 tabular-nums">{{ $i + 1 }}</td>
+                            <td class="px-4 py-3">
+                                <div class="font-semibold text-gray-900 dark:text-white">{{ $p->nama }}</div>
+                                <div class="font-mono text-xs text-blue-600 dark:text-blue-400 mt-0.5">{{ $p->nim }}</div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="font-medium text-gray-800 dark:text-gray-200 truncate max-w-[240px]">
+                                    <i class="fa-solid fa-building text-gray-400 text-xs mr-1"></i> {{ $p->tempat_riset }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-gray-600 dark:text-gray-400 text-xs">"{{ $p->judul_pkl }}"</td>
-                            <td class="px-6 py-4 text-center">
-                                <div class="inline-flex items-center gap-2">
-                                    <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center font-black text-xs border border-emerald-200">{{ $p->nilai }}</div>
-                                </div>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-xl font-semibold text-gray-900 dark:text-white tabular-nums">{{ $p->nilai }}</span>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($p->nilai >= 80)
-                                    <span class="px-2 py-1 rounded bg-emerald-100 text-emerald-700 text-[10px] font-bold">ISTIMEWA</span>
-                                @elseif($p->nilai >= 70)
-                                    <span class="px-2 py-1 rounded bg-blue-100 text-blue-700 text-[10px] font-bold">SANGAT BAIK</span>
-                                @else
-                                    <span class="px-2 py-1 rounded bg-gray-100 text-gray-700 text-[10px] font-bold">BAIK</span>
-                                @endif
+                            <td class="px-4 py-3 text-xs text-gray-600 dark:text-gray-400">{{ $p->penilai ?? '-' }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <button @click="showDetail('{{ encryptUrl($p->user_id) }}')" 
+                                        class="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                                        title="Lihat Detail">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
                             </td>
                         </tr>
                         @empty
-                        <tr><td colspan="5" class="px-6 py-16 text-center text-gray-500">Belum ada mahasiswa yang tuntas dinilai.</td></tr>
+                        <tr>
+                            <td colspan="6">
+                                <div class="p-12 text-center">
+                                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                        <i class="fa-solid fa-folder-open text-2xl text-gray-400"></i>
+                                    </div>
+                                    <p class="text-gray-500 dark:text-gray-400 font-medium">Belum ada mahasiswa selesai dinilai.</p>
+                                </div>
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-
         </div>
+
+        @include('mentor.partials.mahasiswa-detail-modal')
+
     </div>
 </x-app-layout>

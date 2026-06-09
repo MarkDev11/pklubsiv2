@@ -1,0 +1,128 @@
+# AGENTS.md
+
+PKLv2 is a Laravel 13 PKL (Praktek Kerja Lapangan) management system for a higher education institution (UBSI). It manages student proposals, reports, grades, and integrates with academic advisors (Dosen PA) and industry mentors.
+
+## Tech Stack
+
+- **Backend**: Laravel 13, PHP 8.3 (platform locked to `8.3.27` in `composer.json`)
+- **Frontend**: TailwindCSS 4, Alpine.js 3, Vite
+- **Database**: SQLite (dev/testing), supports MySQL/PostgreSQL
+- **Auth**: Laravel Breeze + Google OAuth (Socialite). OTP only used for password reset, not login.
+- **PDF**: DomPDF (`barryvdh/laravel-dompdf`)
+- **Excel**: Maatwebsite Excel
+- **Audit**: Owen-It Laravel Auditing
+- **Browser Testing**: Laravel Dusk
+
+## Developer Commands
+
+Use these exact commands; do not guess alternatives:
+
+```bash
+# One-shot project setup (installs deps, creates .env, generates key, migrates, builds assets)
+composer run setup
+
+# Full dev environment – runs 4 concurrent processes via `concurrently`:
+# Laravel server | Queue listener | Pail logs | Vite dev server
+composer run dev
+
+# Run tests (clears config cache first)
+composer run test
+# Or run a specific test class:
+php artisan test --filter=ProposalControllerTest
+
+# Code quality
+./vendor/bin/pint              # Laravel Pint (preset: laravel, custom rules in pint.json)
+./vendor/bin/phpstan analyse   # Larastan level 8 (excludes app/View)
+
+# Browser tests
+php artisan dusk
+```
+
+## Architecture Notes
+
+### URL Encryption — Critical
+
+**All route IDs are encrypted using custom helpers. Never pass raw IDs in URLs.**
+
+- **Encrypt:** `encryptUrl($id)`
+- **Decrypt:** `decryptUrl($encrypted)` (aborts 403 on failure)
+- Route definitions use `{encrypted}` as the parameter name:  
+  `Route::get('/akun/{encrypted}/edit', ...)`
+- If you generate URLs or redirects, wrap IDs with `encryptUrl()`.
+
+### Role-Based Access Control
+
+Four roles in `App\Enums\UserRole`: `admin`, `dosen`, `mahasiswa`, `mentor`.
+
+- **Middleware:** `CheckRole` — usage is variadic string args:  
+  `Route::middleware('role:admin,dosen')`
+- **User scopes:** `User::mahasiswa()`, `User::dosen()`, `User::mentor()`, `User::admin()`
+- **User helpers:** `$user->isAdmin()`, `$user->isDosen()`, `$user->isMahasiswa()`, `$user->isMentor()`
+- **Dashboard routes:** `$user->role->dashboardRoute()` returns the role-specific home route name.
+
+### Auth Flow
+
+1. Login (standard or Google OAuth)
+2. Redirect to role-specific dashboard (no OTP verification step)
+3. Forgot password uses OTP flow (request → verify OTP → reset)
+
+**Note:** OTP verification after login is **NOT active**. The `CheckOtpVerified` middleware exists but is not registered in `bootstrap/app.php`. Login flows directly to the dashboard without OTP verification. OTP is only used for the forgot password flow.
+
+### User Creation
+
+**No self-registration.** Users cannot register themselves. User accounts can only be created by admins via:
+
+- **Manual creation:** `/admin/akun/create` — Admin inputs user data, selects role, system auto-generates password
+- **Excel import:** `/admin/import` — Bulk user creation via Excel file upload (uses `ImportUsersJob` queue)
+
+There is no `/register` route or public signup form. All users (mahasiswa, dosen, mentor, admin) must be created by an administrator.
+
+**Note:** Google OAuth is NOT a registration method. Users must exist in the database (with matching `email_bsi`) before they can login via Google. OAuth login attempts with unregistered `@bsi.ac.id` emails will be rejected with error "Email tidak terdaftar dalam sistem."
+
+### Services Layer
+
+Business logic is intentionally separated from controllers. Add domain logic here before bloating controllers:
+
+- `DashboardService` — dashboard stats with caching
+- `ProposalService` — proposal CRUD
+- `NilaiService` — grade management
+- `MahasiswaService` — student operations
+- `DataMahasiswaService` — student data operations
+- `UserService` — user management
+- `ImportService` — Excel import
+- `PdfService` — PDF generation
+- `FonnteService` — WhatsApp integration
+- `GroqService` — AI integration
+
+### Model Scopes (`ProposalMahasiswa`)
+
+Frequently used query scopes:
+
+- `belumDinilai()` — `nilai` is null or 0
+- `sudahDinilai()` — `nilai` > 0
+- `magang()` — `jns_pkl` == `'Magang'`
+- `msib()` — `jns_pkl` != `'Magang'` or contains PMK/MSIB
+- `byDosen($namaDosen)` — via `user.nama_dosen_pa`
+- `byMentor($emailMentor)` — via `email_mentor`
+
+## Frontend
+
+- **Entry:** `resources/css/app.css`, `resources/js/app.js`
+- **Libraries:** Chart.js (with Moment adapter), Flatpickr, Alpine.js plugins (anchor, collapse, focus, intersect, morph, persist)
+
+## Testing & Seeding
+
+- **PHPUnit config:** SQLite `:memory:` in testing env (`phpunit.xml`)
+- **Default seeds** (`DatabaseSeeder`):
+  - Admin: `admin` / `admin123`
+  - Dosen: `1234567890` / `dosen123`
+  - Mahasiswa: `12345678` / `mhs123`
+  - Mentor: `sari@perusahaan.com` / `mentor123`
+  - Plus one `OpeningHour` record with default academic timeline
+- **Dummy data:** `DummyDataSeeder` creates 10 extra sample mahasiswa with proposals
+
+## Security & Caching
+
+- **Middleware:** `SecurityHeaders`, `DdosProtection` (rate limiting), `CheckRole`, `CheckOtpVerified`
+- **Cache TTLs:** Dashboard stats 60s, lists 120s, recent logs 30s
+- **Scheduled command:** `pkl:check-timeline` runs daily at `08:00` — broadcasts PKL opening emails, sends H-3 reminder emails to unregistered students, and auto-fills `nilai=75` for unscored proposals after `close_nilai` date (all based on `OpeningHour` settings)

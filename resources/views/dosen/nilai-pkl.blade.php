@@ -1,172 +1,276 @@
 <x-app-layout>
     <x-slot name="title">Verifikasi Nilai PKL</x-slot>
 
-    <div class="space-y-6 animate-fade-in pb-10">
-        
-        {{-- Page Header --}}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="space-y-6">
+
+        {{-- Header --}}
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h2 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-xl bg-cyan-100 dark:bg-cyan-500/10 text-cyan-600 flex items-center justify-center shrink-0">
-                        <i class="fa-solid fa-clipboard-check text-xl"></i>
-                    </div>
-                    Verifikasi Nilai PKL Reguler
-                </h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Evaluasi laporan dan input nilai komulatif mutlak dari masing-masing mahasiswa.</p>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Verifikasi Nilai PKL — Magang Reguler</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                    <i class="fa-solid fa-users text-xs mr-1"></i>
+                    <span class="tabular-nums">{{ $proposals->total() }}</span> mahasiswa bimbingan
+                </p>
             </div>
-            
+
             @if(isset($openingHours) && $openingHours->isNilaiBuka())
-            <div class="bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2 rounded-xl text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-100 dark:border-emerald-800 flex items-center gap-2">
-                <i class="fa-solid fa-unlock text-sm"></i> Sesi Penilaian Terbuka
-            </div>
+                <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-medium border border-emerald-200 dark:border-emerald-800/30">
+                    <i class="fa-solid fa-unlock"></i> Sesi Penilaian Terbuka
+                </span>
             @endif
         </div>
 
-        {{-- Verification Area --}}
-        <div class="bg-white dark:bg-surface-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-surface-700 overflow-hidden relative p-1">
-            
-            @if(isset($openingHours) && !$openingHours->isNilaiBuka())
-                <div class="m-5 rounded-2xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/30 p-8 text-center max-w-2xl mx-auto shadow-sm">
-                    <div class="w-16 h-16 bg-red-100 dark:bg-red-800/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-200 dark:border-red-700/30">
-                        <i class="fa-solid fa-lock text-3xl"></i>
+        {{-- Search & Filter --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <form method="GET" action="{{ route('dosen.nilai.pkl') }}"
+                  x-data="{
+                      search: '{{ request('search') }}',
+                      submitForm() { $el.submit(); }
+                  }"
+                  class="flex flex-col lg:flex-row gap-3">
+                <div class="flex-1">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" name="search" x-model="search"
+                               @input.debounce.2000ms="submitForm()"
+                               placeholder="Cari nama, NIM, tempat, atau mentor..."
+                               class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                     </div>
-                    <h3 class="font-black text-gray-900 dark:text-white text-xl mb-2">Portal Penilaian Terkunci</h3>
-                    <p class="text-gray-600 dark:text-gray-400 text-sm">Anda tidak dapat memberikan atau menyimpan nilai mahasiswa di luar jadwal kalender akademik yang telah ditetapkan oleh Administrator.</p>
                 </div>
-            @elseif($proposals->count())
-                <form method="POST" action="{{ route('dosen.nilai.save') }}">
-                    @csrf
-                    <div class="overflow-x-auto custom-scrollbar rounded-[1.5rem] mt-2 border-t border-gray-100 dark:border-surface-700">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-gray-50 dark:bg-surface-900 text-xs text-gray-500 dark:text-gray-400 uppercase tracking-widest font-bold">
-                                <tr>
-                                    <th class="px-6 py-4 w-12 text-center rounded-tl-xl">No</th>
-                                    <th class="px-6 py-4">Mahasiswa / Mitra</th>
-                                    <th class="px-6 py-4 text-center">Kelengkapan Laporan</th>
-                                    <th class="px-6 py-4 text-center">Terkahir Di-Update</th>
-                                    <th class="px-6 py-4 text-right rounded-tr-xl">Nilai Akhir (0-100)</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100 dark:divide-surface-700 bg-white dark:bg-surface-800">
-                                @foreach($proposals as $i => $p)
-                                <tr class="hover:bg-cyan-50/30 dark:hover:bg-cyan-900/10 transition-colors group">
-                                    <td class="px-6 py-5 text-center">
-                                        <span class="text-gray-500 dark:text-gray-400 font-bold">{{ $i+1 }}</span>
-                                    </td>
-                                    
-                                    <td class="px-6 py-5">
-                                        <div>
-                                            <p class="font-bold text-gray-900 dark:text-white text-base">{{ $p->nama }}</p>
-                                            <div class="flex items-center gap-3 mt-1">
-                                                <span class="text-xs font-mono text-gray-500 bg-gray-100 dark:bg-surface-700 px-2 py-0.5 rounded">{{ $p->nim }}</span>
-                                                <span class="text-xs text-cyan-600 dark:text-cyan-400 truncate max-w-[150px]"><i class="fa-solid fa-building mr-1"></i> {{ $p->tempat_riset }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <td class="px-6 py-5 text-center">
-                                        <div class="flex items-center justify-center gap-2">
-                                            {{-- LP --}}
-                                            <div class="group/tt relative flex flex-col items-center">
-                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center {{ $p->lp ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-gray-100 dark:bg-surface-700 text-gray-400' }} border {{ $p->lp ? 'border-emerald-200 dark:border-emerald-800/50' : 'border-gray-200 dark:border-surface-600' }}">LP</span>
-                                            </div>
-                                            {{-- LPP --}}
-                                            <div class="group/tt relative flex flex-col items-center">
-                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center {{ $p->lpp ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-gray-100 dark:bg-surface-700 text-gray-400' }} border {{ $p->lpp ? 'border-emerald-200 dark:border-emerald-800/50' : 'border-gray-200 dark:border-surface-600' }}">LPP</span>
-                                            </div>
-                                            {{-- SKP --}}
-                                            <div class="group/tt relative flex flex-col items-center">
-                                                <span class="w-8 h-8 rounded-lg flex items-center justify-center {{ $p->skp ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-gray-100 dark:bg-surface-700 text-gray-400' }} border {{ $p->skp ? 'border-emerald-200 dark:border-emerald-800/50' : 'border-gray-200 dark:border-surface-600' }}">SKP</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <td class="px-6 py-5 text-center">
-                                        @if($p->updated_at)
-                                            <p class="text-xs text-gray-500 font-medium">{{ $p->updated_at->format('d/m/Y') }}</p>
-                                            <p class="text-[10px] text-gray-400 mt-0.5">{{ $p->penilai ?? '-' }}</p>
-                                        @else
-                                            <span class="text-xs text-gray-400 italic">Belum Dinilai</span>
-                                        @endif
-                                    </td>
-                                    
-                                    <td class="px-6 py-5 text-right w-48" x-data="{ 
-                                            id: '{{ $p->id }}', 
-                                            nilai: {{ $p->nilai ?: 'null' }}, 
-                                            status: '{{ $p->nilai > 0 ? 'saved' : 'idle' }}',
-                                            save() {
-                                                if(this.nilai === null || this.nilai === '') return;
-                                                this.status = 'saving';
-                                                
-                                                fetch('{{ route('dosen.nilai.save') }}', {
-                                                    method: 'POST',
-                                                    headers: {
-                                                        'Content-Type': 'application/json',
-                                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                        'Accept': 'application/json'
-                                                    },
-                                                    body: JSON.stringify({ form_id: [this.id], nilai: [this.nilai] })
-                                                })
-                                                .then(res => res.json())
-                                                .then(data => {
-                                                    this.status = 'saved';
-                                                })
-                                                .catch(err => {
-                                                    this.status = 'error';
-                                                    console.error(err);
-                                                });
-                                            }
-                                        }">
-                                        <input type="hidden" name="form_id[]" value="{{ $p->id }}">
-                                        <div class="relative w-24 ml-auto">
-                                            <input type="number" name="nilai[]" x-model="nilai" min="0" max="100" @input.debounce.5000ms="save"
-                                                :class="{'border-emerald-300 dark:border-emerald-700 border-2': status === 'saved', 'border-gray-300 dark:border-surface-600 focus:border-cyan-500 focus:ring-cyan-500': status !== 'saved'}"
-                                                class="w-full bg-gray-50 dark:bg-surface-900 border appearance-none text-gray-900 dark:text-white text-lg font-black text-center rounded-xl px-3 py-2 transition-colors">
-                                            
-                                            <template x-if="status === 'saving'">
-                                                <div class="absolute -top-2 -right-2 w-5 h-5 bg-cyan-500 rounded-full border-2 border-white dark:border-surface-800 flex items-center justify-center text-white shadow-sm">
-                                                    <i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
-                                                </div>
-                                            </template>
-                                            
-                                            <template x-if="status === 'saved'">
-                                                <div class="absolute -top-2 -right-2 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white dark:border-surface-800 flex items-center justify-center text-white shadow-sm animate-bounce">
-                                                    <i class="fa-solid fa-check text-[10px]"></i>
-                                                </div>
-                                            </template>
-                                            
-                                            <template x-if="status === 'error'">
-                                                <div class="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 rounded-full border-2 border-white dark:border-surface-800 flex items-center justify-center text-white shadow-sm">
-                                                    <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
-                                                </div>
-                                            </template>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-gray-50/50 dark:bg-surface-850/30 border-t border-gray-100 dark:border-surface-700 mt-2 rounded-b-[2rem]">
-                        <div class="w-full sm:w-auto text-sm">
-                            {{ $proposals->links() }}
+
+                <div class="w-full lg:w-48">
+                    <select name="kelengkapan" @change="submitForm()" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="">Semua Kelengkapan</option>
+                        <option value="lengkap" {{ request('kelengkapan') == 'lengkap' ? 'selected' : '' }}>Dokumen Lengkap</option>
+                        <option value="tidak_lengkap" {{ request('kelengkapan') == 'tidak_lengkap' ? 'selected' : '' }}>Dokumen Kurang</option>
+                    </select>
+                </div>
+
+                <div class="w-full lg:w-48">
+                    <select name="status_nilai" @change="submitForm()" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="">Semua Status</option>
+                        <option value="sudah" {{ request('status_nilai') == 'sudah' ? 'selected' : '' }}>Sudah Dinilai</option>
+                        <option value="belum" {{ request('status_nilai') == 'belum' ? 'selected' : '' }}>Belum Dinilai</option>
+                    </select>
+                </div>
+
+                @if(request()->hasAny(['search', 'kelengkapan', 'status_nilai']))
+                    <a href="{{ route('dosen.nilai.pkl') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span class="hidden sm:inline">Reset</span>
+                    </a>
+                @endif
+            </form>
+        </div>
+
+        {{-- Grading Table (auto-save) --}}
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+            {{-- Period Closed Warning --}}
+            @if(isset($openingHours) && !$openingHours->isNilaiBuka())
+                <div class="p-4 mx-4 mt-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/30 rounded-lg">
+                    <div class="flex gap-3">
+                        <i class="fa-solid fa-lock text-amber-500 mt-0.5"></i>
+                        <div>
+                            <p class="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-1">Periode Input Nilai Ditutup</p>
+                            <p class="text-xs text-amber-700 dark:text-amber-400">Anda dapat melihat data nilai tetapi tidak dapat mengubahnya di luar periode penilaian. Periode: {{ $openingHours->open_nilai?->format('d M Y') ?? '?' }} — {{ $openingHours->close_nilai?->format('d M Y') ?? '?' }}</p>
                         </div>
-                        <button type="submit" class="w-full sm:w-auto btn-primary bg-cyan-600 hover:bg-cyan-500 text-white shadow-[0_0_15px_rgba(8,145,178,0.3)] hover:shadow-[0_0_25px_rgba(8,145,178,0.5)] border-none shrink-0 group">
-                            <i class="fa-solid fa-sd-card mr-2 group-hover:scale-110 transition-transform"></i> Simpan Penilaian Akademik
-                        </button>
                     </div>
-                </form>
-            @else 
-                <div class="py-16 text-center">
-                    <div class="w-16 h-16 bg-gray-50 dark:bg-surface-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-surface-700">
-                        <i class="fa-solid fa-file-circle-check text-2xl text-gray-400"></i>
+                </div>
+            @endif
+
+            @if($proposals->count())
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-16">No</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Mahasiswa</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Tempat & Mentor</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Kelengkapan</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-32">
+                                    <div>Input Nilai</div>
+                                    <div class="text-[10px] font-normal normal-case text-gray-400 mt-0.5">75-100 atau kosongkan</div>
+                                </th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Informasi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                            @foreach($proposals as $i => $p)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                                <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 tabular-nums">{{ $i + 1 }}</td>
+
+                                <td class="px-4 py-3">
+                                    <div class="font-semibold text-gray-900 dark:text-white">{{ $p->nama }}</div>
+                                    <div class="font-mono text-xs text-blue-600 dark:text-blue-400 mt-0.5">{{ $p->nim }}</div>
+                                </td>
+
+                                <td class="px-4 py-3">
+                                    <div class="flex items-start gap-2">
+                                        <i class="fa-solid fa-building text-gray-400 text-sm mt-0.5"></i>
+                                        <div>
+                                            <div class="font-medium text-gray-800 dark:text-gray-200">{{ $p->tempat_riset }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                <i class="fa-solid fa-user-tie text-xs mr-1"></i>
+                                                {{ $p->nama_mentor ?? 'Belum ada mentor' }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-4 py-3">
+                                    <div class="flex justify-center gap-1.5">
+                                        @if($p->lp)
+                                            <a href="{{ route('proposal.download', ['id' => encryptUrl($p->id), 'type' => 'lp']) }}"
+                                               class="px-2 py-1 rounded text-xs font-medium border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors cursor-pointer inline-flex items-center gap-1"
+                                               title="Klik untuk download Laporan PKL">
+                                                <i class="fa-solid fa-download text-[10px]"></i>
+                                                LP
+                                            </a>
+                                        @else
+                                            <span class="px-2 py-1 rounded text-xs font-medium border bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30" title="Laporan PKL belum diupload">LP</span>
+                                        @endif
+
+                                        @if($p->lpp)
+                                            <a href="{{ route('proposal.download', ['id' => encryptUrl($p->id), 'type' => 'lpp']) }}"
+                                               class="px-2 py-1 rounded text-xs font-medium border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors cursor-pointer inline-flex items-center gap-1"
+                                               title="Klik untuk download Lembar Penilaian">
+                                                <i class="fa-solid fa-download text-[10px]"></i>
+                                                LPP
+                                            </a>
+                                        @else
+                                            <span class="px-2 py-1 rounded text-xs font-medium border bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30" title="Lembar Penilaian belum diupload">LPP</span>
+                                        @endif
+
+                                        @if($p->skp)
+                                            <a href="{{ route('proposal.download', ['id' => encryptUrl($p->id), 'type' => 'skp']) }}"
+                                               class="px-2 py-1 rounded text-xs font-medium border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors cursor-pointer inline-flex items-center gap-1"
+                                               title="Klik untuk download Sertifikat">
+                                                <i class="fa-solid fa-download text-[10px]"></i>
+                                                SKP
+                                            </a>
+                                        @else
+                                            <span class="px-2 py-1 rounded text-xs font-medium border bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800/30" title="Sertifikat belum diupload">SKP</span>
+                                        @endif
+                                    </div>
+                                </td>
+
+                                <td class="px-4 py-3 text-center" x-data="{
+                                        id: '{{ $p->id }}',
+                                        nilai: {{ $p->nilai ?: 'null' }},
+                                        status: '{{ $p->nilai > 0 ? 'saved' : 'idle' }}',
+                                        errorMessage: '',
+                                        markPending() {
+                                            if (this.nilai === null || this.nilai === '') return;
+                                            this.status = 'pending';
+                                        },
+                                        save() {
+                                            if (this.nilai === null || this.nilai === '') return;
+                                            const valueToSave = this.nilai;
+                                            this.status = 'saving';
+                                            this.errorMessage = '';
+
+                                            fetch('{{ route('dosen.nilai.save') }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json'
+                                                },
+                                                body: JSON.stringify({ form_id: [this.id], nilai: [parseInt(valueToSave, 10)] })
+                                            })
+                                            .then(async res => {
+                                                const data = await res.json().catch(() => ({}));
+                                                if (!res.ok) {
+                                                    this.status = 'error';
+                                                    this.errorMessage = data?.errors?.['nilai.0']?.[0] || data?.message || 'Gagal menyimpan.';
+                                                    return;
+                                                }
+                                                if (this.nilai == valueToSave) {
+                                                    this.status = 'saved';
+                                                } else {
+                                                    this.status = 'pending';
+                                                }
+                                            })
+                                            .catch(err => {
+                                                this.status = 'error';
+                                                this.errorMessage = 'Koneksi gagal.';
+                                                console.error(err);
+                                            });
+                                        }
+                                    }">
+                                    <div class="relative w-24 mx-auto">
+                                        <input type="number" name="nilai[]" x-model="nilai" min="75" max="100" step="1"
+                                               {{ isset($openingHours) && !$openingHours->isNilaiBuka() ? 'readonly' : '' }}
+                                               @input="markPending"
+                                               @input.debounce.5000ms="save"
+                                               :class="{
+                                                   'border-amber-400 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 border-2 ring-4 ring-amber-500/20': status === 'pending' || status === 'saving',
+                                                   'border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20 border-2': status === 'saved',
+                                                   'border-rose-400 dark:border-rose-700 border-2': status === 'error',
+                                                   'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500': status === 'idle'
+                                               }"
+                                               class="w-full text-center py-2 px-2 font-semibold text-lg rounded-md border bg-white dark:bg-gray-900 text-gray-900 dark:text-white tabular-nums focus:outline-none focus:ring-2 transition-all {{ isset($openingHours) && !$openingHours->isNilaiBuka() ? 'cursor-not-allowed opacity-60' : '' }}">
+                                        <template x-if="status === 'pending' || status === 'saving'">
+                                            <div class="absolute -top-2 -right-2 w-5 h-5 bg-amber-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white shadow-sm">
+                                                <i class="fa-solid fa-spinner fa-spin text-[10px]"></i>
+                                            </div>
+                                        </template>
+                                        <template x-if="status === 'saved'">
+                                            <div class="absolute -top-2 -right-2 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white shadow-sm">
+                                                <i class="fa-solid fa-check text-[10px]"></i>
+                                            </div>
+                                        </template>
+                                        <template x-if="status === 'error'">
+                                            <div class="absolute -top-2 -right-2 w-5 h-5 bg-rose-500 rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center text-white shadow-sm" :title="errorMessage">
+                                                <i class="fa-solid fa-triangle-exclamation text-[10px]"></i>
+                                            </div>
+                                        </template>
+                                    </div>
+                                    <p x-show="status === 'error'" x-text="errorMessage" x-cloak class="mt-1 text-[10px] text-rose-600 dark:text-rose-400"></p>
+                                </td>
+
+                                <td class="px-4 py-3">
+                                    <div class="text-xs space-y-1">
+                                        <div class="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+                                            <i class="fa-solid fa-user-pen text-xs"></i>
+                                            <span>{{ $p->penilai ?? 'Belum dinilai' }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5 text-gray-500 dark:text-gray-500">
+                                            <i class="fa-solid fa-clock text-xs"></i>
+                                            <span>{{ $p->updated_at?->format('d M Y, H:i') }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="flex flex-col sm:flex-row justify-between items-center px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 gap-4">
+                    <div class="w-full sm:w-auto">
+                        {{ $proposals->links() }}
                     </div>
-                    <p class="font-bold text-gray-900 dark:text-white">Tidak Ada Data</p>
-                    <p class="text-sm text-gray-500">Belum ada mahasiswa PKL yang diturunkan untuk Anda nilai.</p>
-                </div> 
+                    <p class="text-xs text-gray-500 dark:text-gray-400 italic">
+                        <i class="fa-solid fa-circle-info mr-1"></i>
+                        Nilai tersimpan otomatis 5 detik setelah Anda berhenti mengetik.
+                    </p>
+                </div>
+            @else
+                <div class="p-12 text-center">
+                    <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-inbox text-2xl text-gray-400"></i>
+                    </div>
+                    <p class="text-gray-500 dark:text-gray-400 font-medium">Belum ada mahasiswa PKL Magang yang dibimbing.</p>
+                </div>
             @endif
         </div>
+
+        @include('partials.scoped-export-panel', [
+            'exportAction' => route('dosen.exports.pkl'),
+            'exportCategory' => 'pkl',
+            'exportHistory' => $exportHistory,
+        ])
 
     </div>
 </x-app-layout>

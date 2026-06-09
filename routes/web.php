@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AkunController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboard;
+use App\Http\Controllers\Admin\ExportController;
 use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\NilaiController as AdminNilaiController;
@@ -14,6 +15,7 @@ use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\OtpController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\SsoController;
 use App\Http\Controllers\Dosen\DashboardController as DosenDashboard;
 use App\Http\Controllers\Dosen\DataMahasiswaController as DosenDataMahasiswa;
 use App\Http\Controllers\Dosen\NilaiController as DosenNilaiController;
@@ -58,14 +60,15 @@ Route::middleware('guest')->group(function () {
     Route::get('/auth/google/callback', [GoogleController::class, 'callback'])->name('auth.google.callback');
 
     // Internal SSO Endpoint
-    Route::get('/sso/portal', [\App\Http\Controllers\Auth\SsoController::class, 'handle'])->name('sso.portal');
+    Route::get('/sso/portal', [SsoController::class, 'handle'])->name('sso.portal');
 
     // Forgot Password (OTP)
     Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
     Route::get('/forgot-password/verify', [PasswordResetLinkController::class, 'showVerifyForm'])->name('password.verify-otp');
     Route::post('/forgot-password/verify', [PasswordResetLinkController::class, 'verifyOtp'])->name('password.confirm-otp');
-    
+    Route::post('/forgot-password/resend', [PasswordResetLinkController::class, 'resendOtp'])->name('password.resend-otp')->middleware('throttle:3,1');
+
     Route::get('/reset-password', [NewPasswordController::class, 'create'])->name('password.reset');
     Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.update');
 });
@@ -95,8 +98,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/ai/chat', [AiAssistantController::class, 'chat'])->name('ai.chat');
     });
 
-    // File Serving
-    Route::get('/files/{filename}', [FileController::class, 'serve'])->name('files.serve');
+    // File Serving - encrypted filename
+    Route::get('/files/{encrypted}', [FileController::class, 'serve'])->name('files.serve');
+
+    // Proposal Document Download
+    Route::get('/proposal/{id}/download/{type}', [FileController::class, 'downloadProposalDocument'])->name('proposal.download');
+
+    // Export Download (public with short code)
+    Route::get('/exports/file/{export}/download', [ExportController::class, 'downloadFile'])->name('exports.file.download');
+    Route::get('/exports/{code}/download', [ExportController::class, 'download'])->name('exports.download');
 
     /*
     |----------------------------------------------------------------------
@@ -128,6 +138,19 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/pdf/pkl', [AdminPdfController::class, 'pklPdf'])->name('pdf.pkl');
         Route::get('/pdf/msib', [AdminPdfController::class, 'msibPdf'])->name('pdf.msib');
+
+        // Export routes (with filter & chunked processing)
+        Route::get('/exports/history', [ExportController::class, 'history'])->name('exports.history');
+        Route::delete('/exports/cleanup', [ExportController::class, 'cleanup'])->name('exports.cleanup');
+        Route::delete('/exports/cleanup-all', [ExportController::class, 'cleanupAll'])->name('exports.cleanup-all');
+        Route::get('/exports/pkl/config', [ExportController::class, 'pklConfig'])->name('exports.pkl.config');
+        Route::get('/exports/msib/config', [ExportController::class, 'msibConfig'])->name('exports.msib.config');
+        Route::post('/exports/count', [ExportController::class, 'count'])->name('exports.count');
+        Route::post('/exports/initiate', [ExportController::class, 'initiate'])->name('exports.initiate');
+        Route::get('/exports/{export}/progress', [ExportController::class, 'progress'])->name('exports.progress');
+        Route::post('/exports/{export}/chunk', [ExportController::class, 'processChunk'])->name('exports.chunk');
+        Route::post('/exports/{export}/finalize', [ExportController::class, 'finalize'])->name('exports.finalize');
+        Route::get('/exports/{export}/status', [ExportController::class, 'status'])->name('exports.status');
 
         Route::get('/mahasiswa', [MahasiswaController::class, 'index'])->name('mahasiswa.index');
         Route::post('/mahasiswa/datatable', [MahasiswaController::class, 'datatable'])->name('mahasiswa.datatable');
@@ -164,6 +187,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/mahasiswa/pkl', [DosenDataMahasiswa::class, 'pklIndex'])->name('mahasiswa.pkl');
         Route::get('/mahasiswa/msib', [DosenDataMahasiswa::class, 'msibIndex'])->name('mahasiswa.msib');
+        Route::get('/mahasiswa/{encrypted}/detail', [DosenDataMahasiswa::class, 'detail'])->name('mahasiswa.detail');
 
         Route::get('/nilai/pkl', [DosenNilaiController::class, 'pklIndex'])->name('nilai.pkl');
         Route::get('/nilai/msib', [DosenNilaiController::class, 'msibIndex'])->name('nilai.msib');
@@ -171,6 +195,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/pdf/pkl', [DosenNilaiController::class, 'generatePdfPkl'])->name('pdf.pkl');
         Route::get('/pdf/msib', [DosenNilaiController::class, 'generatePdfMsib'])->name('pdf.msib');
+        Route::post('/exports/pkl', [DosenNilaiController::class, 'exportPkl'])->name('exports.pkl');
+        Route::post('/exports/msib', [DosenNilaiController::class, 'exportMsib'])->name('exports.msib');
     });
 
     /*
@@ -183,6 +209,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/mahasiswa/pkl', [MentorDataMahasiswa::class, 'pklIndex'])->name('mahasiswa.pkl');
         Route::get('/mahasiswa/msib', [MentorDataMahasiswa::class, 'msibIndex'])->name('mahasiswa.msib');
+        Route::get('/mahasiswa/{encrypted}/detail', [MentorDataMahasiswa::class, 'detail'])->name('mahasiswa.detail');
 
         Route::get('/nilai/pkl', [MentorNilaiController::class, 'pklIndex'])->name('nilai.pkl');
         Route::get('/nilai/msib', [MentorNilaiController::class, 'msibIndex'])->name('nilai.msib');
@@ -190,5 +217,7 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/pdf/pkl', [MentorNilaiController::class, 'generatePdfPkl'])->name('pdf.pkl');
         Route::get('/pdf/msib', [MentorNilaiController::class, 'generatePdfMsib'])->name('pdf.msib');
+        Route::post('/exports/pkl', [MentorNilaiController::class, 'exportPkl'])->name('exports.pkl');
+        Route::post('/exports/msib', [MentorNilaiController::class, 'exportMsib'])->name('exports.msib');
     });
 });

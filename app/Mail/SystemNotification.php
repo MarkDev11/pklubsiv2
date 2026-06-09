@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
@@ -15,8 +14,11 @@ class SystemNotification extends Mailable
     use Queueable, SerializesModels;
 
     public string $title;
+
     public string $messageContent;
+
     public ?string $actionUrl;
+
     public string $subjectContent;
 
     /**

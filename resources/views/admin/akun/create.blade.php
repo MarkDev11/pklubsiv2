@@ -13,7 +13,7 @@
         </div>
 
         {{-- Header Card --}}
-        <div class="rounded-2xl border border-gray-200 dark:border-surface-700 bg-white dark:bg-surface-800 overflow-hidden shadow-sm">
+        <div class="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
             <div class="bg-gradient-to-r from-blue-600 to-indigo-700 px-6 py-6 relative overflow-hidden">
                 <div class="flex items-center gap-4 relative z-10">
                     <div class="w-14 h-14 bg-white/20 backdrop-blur rounded-2xl flex items-center justify-center text-white text-xl shadow-lg border border-white/10">
@@ -40,7 +40,7 @@
                                 Nama Lengkap <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="name" value="{{ old('name') }}" required
-                                   class="form-input w-full bg-gray-50 dark:bg-surface-900 border-gray-200 dark:border-surface-700 rounded-xl"
+                                   class="form-input w-full bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
                                    placeholder="Contoh: Budi Santoso">
                             @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -51,7 +51,7 @@
                                 Username / NIM / NIP <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="username" value="{{ old('username') }}" required
-                                   class="form-input w-full font-mono bg-gray-50 dark:bg-surface-900 border-gray-200 dark:border-surface-700 rounded-xl"
+                                   class="form-input w-full font-mono bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
                                    placeholder="Contoh: 12345678">
                             @error('username') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
@@ -61,7 +61,7 @@
                             <label class="form-label text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                                 Role Akses <span class="text-red-500">*</span>
                             </label>
-                            <select name="role" x-model="role" required class="form-input w-full bg-gray-50 dark:bg-surface-900 border-gray-200 dark:border-surface-700 rounded-xl">
+                            <select name="role" x-model="role" required class="form-input w-full bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl">
                                 <option value="mahasiswa">Mahasiswa</option>
                                 <option value="dosen">Dosen</option>
                                 <option value="mentor">Mentor</option>
@@ -76,7 +76,7 @@
                                 Password <span class="text-gray-400 font-normal text-xs ml-1">(opsional)</span>
                             </label>
                             <input type="password" name="password"
-                                   class="form-input w-full bg-gray-50 dark:bg-surface-900 border-gray-200 dark:border-surface-700 rounded-xl"
+                                   class="form-input w-full bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
                                    placeholder="Biarkan kosong untuk password default">
                             <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Kosongi bidang ini untuk menggunakan password bawaan: <strong class="font-mono text-gray-700 dark:text-gray-300">bs10k3PKL</strong></p>
                             @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -101,14 +101,14 @@
                         <div>
                             <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Kelas</label>
                             <input type="text" name="kd_lokal" value="{{ old('kd_lokal') }}"
-                                   class="form-input w-full bg-white dark:bg-surface-800 border-indigo-200 dark:border-surface-600 rounded-lg text-sm"
+                                   class="form-input w-full bg-white dark:bg-gray-800 border-indigo-200 dark:border-gray-600 rounded-lg text-sm"
                                    placeholder="Contoh: 12.7A.01">
                         </div>
 
                         {{-- Jenis Magang --}}
                         <div>
                             <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Jenis Magang</label>
-                            <select name="jenis" class="form-input w-full bg-white dark:bg-surface-800 border-indigo-200 dark:border-surface-600 rounded-lg text-sm">
+                            <select name="jenis" class="form-input w-full bg-white dark:bg-gray-800 border-indigo-200 dark:border-gray-600 rounded-lg text-sm">
                                 <option value="">-- Pilih Jenis --</option>
                                 <option value="Magang" {{ old('jenis') == 'Magang' ? 'selected' : '' }}>Magang</option>
                                 <option value="PMK" {{ old('jenis') == 'PMK' ? 'selected' : '' }}>PMK</option>
@@ -119,14 +119,14 @@
                         <div>
                             <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Nama Dosen PA</label>
                             <input type="text" name="nama_dosen_pa" value="{{ old('nama_dosen_pa') }}"
-                                   class="form-input w-full bg-white dark:bg-surface-800 border-indigo-200 dark:border-surface-600 rounded-lg text-sm"
+                                   class="form-input w-full bg-white dark:bg-gray-800 border-indigo-200 dark:border-gray-600 rounded-lg text-sm"
                                    placeholder="Nama Dosen">
                         </div>
                     </div>
 
                     {{-- Actions --}}
-                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-surface-700 mt-6">
-                        <a href="{{ route('admin.akun.index') }}" class="btn text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-surface-700 hover:bg-gray-200 dark:hover:bg-surface-600 rounded-xl px-5 py-2.5 font-medium text-sm transition-colors">
+                    <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100 dark:border-gray-700 mt-6">
+                        <a href="{{ route('admin.akun.index') }}" class="btn text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl px-5 py-2.5 font-medium text-sm transition-colors">
                             Batal
                         </a>
                         <button type="submit" class="btn-primary rounded-xl px-6 py-2.5 shadow-lg shadow-blue-500/20 flex items-center gap-2 text-sm font-bold">

@@ -109,11 +109,10 @@ class MahasiswaService
                 'nim' => e($u->username),
                 'nama' => e($u->name),
                 'kd_lokal' => e($u->kd_lokal ?? '-'),
-                'jenis' => $proposal ? e($proposal->jns_pkl) : '-',
+                'jenis' => $proposal ? $this->formatJenisBadge($proposal->jns_pkl) : '-',
                 'tempat' => $proposal ? e($proposal->tempat_riset) : '-',
                 'mentor' => $proposal ? e($proposal->nama_mentor) : '-',
-                'status_class' => $status['class'],
-                'status_label' => $status['label'],
+                'status' => $this->formatStatusBadge($status['class'], $status['label']),
             ];
         }
 
@@ -134,5 +133,33 @@ class MahasiswaService
         }
 
         return ['class' => 'badge-yellow', 'label' => 'Sedang Proses'];
+    }
+
+    /**
+     * Format status badge HTML
+     */
+    protected function formatStatusBadge(string $class, string $label): string
+    {
+        $baseClasses = 'inline-flex items-center text-xs font-medium px-2 py-0.5 rounded';
+
+        $colorClasses = match ($class) {
+            'badge-red' => 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400',
+            'badge-yellow' => 'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
+            'badge-green' => 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400',
+            default => 'bg-gray-50 text-gray-700 dark:bg-gray-900/20 dark:text-gray-400',
+        };
+
+        return "<span class=\"{$baseClasses} {$colorClasses}\">{$label}</span>";
+    }
+
+    /**
+     * Format jenis PKL badge HTML
+     */
+    protected function formatJenisBadge(string $jenis): string
+    {
+        $baseClasses = 'inline-flex items-center text-xs font-medium px-2 py-0.5 rounded';
+        $colorClasses = 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400';
+
+        return "<span class=\"{$baseClasses} {$colorClasses}\">".e($jenis).'</span>';
     }
 }

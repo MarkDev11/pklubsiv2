@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Enums\UserRole;
+use App\Mail\SystemNotification;
 use App\Models\ActivityLog;
 use App\Models\ProposalMahasiswa;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
-use App\Mail\SystemNotification;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -29,14 +29,15 @@ class ProposalService
 
             $skmName = null;
             if ($skmFile) {
-                $skmName = $this->uploadFile($skmFile, 'skm', $data['nim']);
+                // Use authenticated user's username (NIM) for filename, not request data
+                $skmName = $this->uploadFile($skmFile, 'skm', $user->username);
             }
 
             $proposal = ProposalMahasiswa::create([
                 'user_id' => $user->id,
-                'nim' => $data['nim'],
-                'nama' => $data['nama'],
-                'kd_lokal' => $data['kd_lokal'] ?? null,
+                'nim' => $user->username, // Use auth user's username (NIM), not request
+                'nama' => $user->name, // Use auth user's name, not request
+                'kd_lokal' => $user->kd_lokal, // Use auth user's kd_lokal, not request
                 'jns_pkl' => $data['jns_pkl'],
                 'judul_pkl' => $data['judul_pkl'],
                 'tempat_riset' => $data['tempat_riset'],
@@ -75,7 +76,7 @@ class ProposalService
             // 2. Notify Mentor Industri
             if ($proposal->email_mentor) {
                 Mail::to($proposal->email_mentor)->send(new SystemNotification(
-                    'Pendaftaran Mahasiswa PKL - ' . $mahasiswa->name,
+                    'Pendaftaran Mahasiswa PKL - '.$mahasiswa->name,
                     'Permintaan Bimbingan PKL',
                     "Halo {$proposal->nama_mentor}, mahasiswa kami {$mahasiswa->name} telah mengajukan permintaan bimbingan PKL di tempat Anda dengan judul '{$proposal->judul_pkl}'.",
                     null
@@ -86,7 +87,7 @@ class ProposalService
             $dosen = User::where('name', $mahasiswa->nama_dosen_pa)->where('role', UserRole::Dosen->value)->first();
             if ($dosen && $dosen->email) {
                 Mail::to($dosen->email)->send(new SystemNotification(
-                    'Pengajuan PKL Baru - ' . $mahasiswa->name,
+                    'Pengajuan PKL Baru - '.$mahasiswa->name,
                     'Review Proposal PKL',
                     "Halo {$dosen->name}, mahasiswa bimbingan Anda {$mahasiswa->name} baru saja mengajukan proposal PKL. Silakan melakukan review melalui dashboard.",
                     route('dosen.mahasiswa.pkl')
@@ -94,7 +95,7 @@ class ProposalService
             }
         } catch (\Exception $e) {
             // Log error but don't stop the process
-            \Log::error('Failed to send proposal notifications: ' . $e->getMessage());
+            \Log::error('Failed to send proposal notifications: '.$e->getMessage());
         }
     }
 
@@ -104,15 +105,16 @@ class ProposalService
     public function update(ProposalMahasiswa $proposal, User $user, array $data, ?UploadedFile $skmFile): ProposalMahasiswa
     {
         return DB::transaction(function () use ($proposal, $user, $data, $skmFile) {
+            // Only update editable proposal fields, NOT identity fields
             $updateData = collect($data)->only([
-                'nim', 'nama', 'kd_lokal', 'jns_pkl', 'judul_pkl',
-                'tempat_riset', 'nama_mentor', 'hp_mentor',
-                'email_mentor', 'email_perusahaan',
+                'jns_pkl', 'judul_pkl', 'tempat_riset',
+                'nama_mentor', 'hp_mentor', 'email_mentor', 'email_perusahaan',
             ])->toArray();
 
             if ($skmFile) {
                 $this->deleteOldFile($proposal->skm);
-                $updateData['skm'] = $this->uploadFile($skmFile, 'skm', $data['nim']);
+                // Use authenticated user's username (NIM) for filename, not request data
+                $updateData['skm'] = $this->uploadFile($skmFile, 'skm', $user->username);
             }
 
             $proposal->update($updateData);
@@ -155,13 +157,13 @@ class ProposalService
             return;
         }
 
-        User::create([
-            'name' => $name,
-            'username' => $email,
-            'email' => $email,
-            'password' => Str::random(16),
-            'role' => UserRole::Mentor->value,
-            'phone' => $phone,
-        ]);
+    User::create([
+        'name' => $name,
+        'username' => $email,
+        'email' => $email,
+        'password' => $phone,
+        'role' => UserRole::Mentor->value,
+        'phone' => $phone,
+    ]);
     }
 }

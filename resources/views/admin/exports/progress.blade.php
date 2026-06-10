@@ -92,7 +92,6 @@
 const exportId = {{ $export->id }};
 const totalRecords = {{ $export->total_records }};
 const CHUNK_SIZE = 100;
-let collectedData = [];
 let currentOffset = 0;
 let isProcessing = false;
 
@@ -132,7 +131,6 @@ async function processNextChunk() {
         const result = await response.json();
 
         if (result.success) {
-            collectedData = collectedData.concat(result.data);
             currentOffset += limit;
             updateProgress(result.processed, totalRecords);
             
@@ -155,7 +153,7 @@ async function finalizeExport() {
 
         const response = await fetch(`/admin/exports/${exportId}/finalize`, {
             method: 'POST',
-            body: JSON.stringify({ data: collectedData }),
+            body: JSON.stringify({}),
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',

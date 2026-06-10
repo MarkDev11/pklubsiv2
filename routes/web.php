@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\ImportController;
 use App\Http\Controllers\Admin\MahasiswaController;
 use App\Http\Controllers\Admin\NilaiController as AdminNilaiController;
 use App\Http\Controllers\Admin\OpeningHourController;
-use App\Http\Controllers\Admin\PdfController as AdminPdfController;
 use App\Http\Controllers\Admin\SystemLogController;
 use App\Http\Controllers\AiAssistantController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -104,9 +103,11 @@ Route::middleware('auth')->group(function () {
     // Proposal Document Download
     Route::get('/proposal/{id}/download/{type}', [FileController::class, 'downloadProposalDocument'])->name('proposal.download');
 
-    // Export Download (public with short code)
-    Route::get('/exports/file/{export}/download', [ExportController::class, 'downloadFile'])->name('exports.file.download');
-    Route::get('/exports/{code}/download', [ExportController::class, 'download'])->name('exports.download');
+    // Export Download (public with short code, rate limited)
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::get('/exports/file/{export}/download', [ExportController::class, 'downloadFile'])->name('exports.file.download');
+        Route::get('/exports/{code}/download', [ExportController::class, 'download'])->name('exports.download');
+    });
 
     /*
     |----------------------------------------------------------------------
@@ -135,9 +136,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/nilai/pkl', [AdminNilaiController::class, 'pklIndex'])->name('nilai.pkl');
         Route::get('/nilai/msib', [AdminNilaiController::class, 'msibIndex'])->name('nilai.msib');
         Route::post('/nilai/save', [AdminNilaiController::class, 'saveNilai'])->name('nilai.save');
-
-        Route::get('/pdf/pkl', [AdminPdfController::class, 'pklPdf'])->name('pdf.pkl');
-        Route::get('/pdf/msib', [AdminPdfController::class, 'msibPdf'])->name('pdf.msib');
 
         // Export routes (with filter & chunked processing)
         Route::get('/exports/history', [ExportController::class, 'history'])->name('exports.history');

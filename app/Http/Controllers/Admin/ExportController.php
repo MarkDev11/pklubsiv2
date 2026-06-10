@@ -173,27 +173,16 @@ class ExportController extends Controller
         try {
             $export->update(['status' => 'processing']);
 
-            $query = $this->buildFilteredQuery($request, $export->category);
-            
+            $query = $this->buildExportQuery($export);
+             
             $chunk = $query->with(['user', 'dosenPaUser'])
                           ->skip($validated['offset'])
                           ->take($validated['limit'])
                           ->get();
 
-            $chunkData = $chunk->map(function($proposal) {
-                return [
-                    'nim' => $proposal->nim,
-                    'nama' => $proposal->nama,
-                    'judul_pkl' => $proposal->judul_pkl,
-                    'tempat_riset' => $proposal->tempat_riset,
-                    'nama_mentor' => $proposal->nama_mentor,
-                    'email_perusahaan' => $proposal->email_perusahaan,
-                    'dosen_pa' => $proposal->dosenPaLabel(),
-                    'nilai' => $proposal->nilai,
-                    'penilai' => $proposal->penilai,
-                    'updated_at' => $proposal->updated_at?->format('d/m/Y H:i') ?? '-',
-                ];
-            })->toArray();
+            if ($export->type === 'excel') {
+                $this->appendCsvChunk($export, $chunk, $validated['offset'] === 0);
+            }
 
             $newProcessed = $validated['offset'] + $chunk->count();
             $export->update(['processed_records' => $newProcessed]);
@@ -202,7 +191,6 @@ class ExportController extends Controller
                 'success' => true,
                 'processed' => $newProcessed,
                 'total' => $export->total_records,
-                'data' => $chunkData,
             ]);
 
         } catch (\Exception $e) {
@@ -224,16 +212,14 @@ class ExportController extends Controller
             abort(403);
         }
 
-        $allData = $request->input('data', []);
-
         try {
             $timestamp = now()->format('Ymd_His');
             $filename = "{$export->category}_{$export->type}_{$timestamp}";
 
             if ($export->type === 'pdf') {
-                $path = $this->generatePdfFromData($allData, $export->category, $filename);
+                $path = $this->generatePdfFromExport($export, $filename);
             } else {
-                $path = $this->generateExcelFromData($allData, $export->category, $filename);
+                $path = $export->path ?: $this->initializeCsvExport($export);
             }
 
             $shortCode = $this->generateShortCode();
@@ -269,6 +255,10 @@ class ExportController extends Controller
     {
         $export = Export::where('short_code', $code)->firstOrFail();
 
+        if ($export->status !== 'completed' || ! $export->path || ! $export->filename) {
+            abort(404, 'Export belum siap diunduh.');
+        }
+
         if ($export->isExpired()) {
             abort(404, 'Export telah kadaluarsa.');
         }
@@ -286,6 +276,10 @@ class ExportController extends Controller
     {
         if ($export->user_id !== auth()->id()) {
             abort(403);
+        }
+
+        if ($export->status !== 'completed' || ! $export->path || ! $export->filename) {
+            abort(404, 'Export belum siap diunduh.');
         }
 
         if ($export->isExpired()) {
@@ -365,14 +359,22 @@ class ExportController extends Controller
         return $query;
     }
 
-    protected function generatePdfFromData(array $data, string $category, string $filename): string
+    protected function buildExportQuery(Export $export)
     {
-        // Convert array data to objects for compatibility with PDF view
-        $proposals = collect($data)->map(function($item) {
-            return (object) $item;
-        });
+        $filters = $export->filters ?? [];
+        $request = new Request(array_merge($filters, ['category' => $export->category]));
+
+        return $this->buildFilteredQuery($request, $export->category);
+    }
+
+    protected function generatePdfFromExport(Export $export, string $filename): string
+    {
+        $proposals = $this->buildExportQuery($export)
+            ->with(['user', 'dosenPaUser'])
+            ->limit(1000)
+            ->get();
         
-        $pdf = Pdf::loadView('pdf.rekap-nilai-' . $category, [
+        $pdf = Pdf::loadView('pdf.rekap-nilai-' . $export->category, [
             'proposals' => $proposals,
             'user' => auth()->user(),
         ]);
@@ -383,32 +385,67 @@ class ExportController extends Controller
         return $path;
     }
 
-    protected function generateExcelFromData(array $data, string $category, string $filename): string
+    protected function initializeCsvExport(Export $export): string
     {
-        $path = "exports/{$filename}.csv";
-        
-        // Simple CSV generation as Excel
-        $csvContent = "NIM,Nama,Tempat Riset,Mentor,Dosen PA,Nilai\n";
-        foreach ($data as $row) {
-            $csvContent .= implode(',', [
-                $row['nim'],
-                $row['nama'],
-                $row['tempat_riset'] ?? '-',
-                $row['nama_mentor'] ?? '-',
-                $row['dosen_pa'] ?? '-',
-                $row['nilai'] ?? '0',
-            ]) . "\n";
-        }
-
-        Storage::put($path, $csvContent);
+        $path = $export->path ?: 'exports/'.$export->category.'_excel_'.$export->id.'.csv';
+        Storage::put($path, "\xEF\xBB\xBF".$this->csvLine(['NIM', 'Nama', 'Judul PKL', 'Tempat Riset', 'Nama Mentor', 'Email Perusahaan', 'Dosen PA', 'Nilai', 'Penilai', 'Terakhir Update']));
+        $export->update([
+            'path' => $path,
+            'filename' => basename($path),
+        ]);
 
         return $path;
+    }
+
+    protected function appendCsvChunk(Export $export, $chunk, bool $reset): void
+    {
+        $path = $reset ? $this->initializeCsvExport($export) : ($export->path ?: $this->initializeCsvExport($export));
+        $content = '';
+
+        foreach ($chunk as $proposal) {
+            $content .= $this->csvLine([
+                $proposal->nim,
+                $proposal->nama,
+                $proposal->judul_pkl,
+                $proposal->tempat_riset,
+                $proposal->nama_mentor,
+                $proposal->email_perusahaan,
+                $proposal->dosenPaLabel(),
+                $proposal->nilai,
+                $proposal->penilai,
+                $proposal->updated_at?->format('d/m/Y H:i') ?? '-',
+            ]);
+        }
+
+        Storage::append($path, rtrim($content, "\r\n"));
+    }
+
+    protected function csvLine(array $row): string
+    {
+        $handle = fopen('php://temp', 'r+');
+        fputcsv($handle, array_map(fn ($value) => $this->sanitizeCsvValue($value), $row));
+        rewind($handle);
+        $line = stream_get_contents($handle);
+        fclose($handle);
+
+        return $line;
+    }
+
+    protected function sanitizeCsvValue(mixed $value): string
+    {
+        $value = (string) ($value ?? '');
+
+        if ($value !== '' && in_array($value[0], ['=', '+', '-', '@'], true)) {
+            return "'".$value;
+        }
+
+        return $value;
     }
 
     protected function generateShortCode(): string
     {
         do {
-            $code = Str::random(8);
+            $code = Str::random(10);
         } while (Export::where('short_code', $code)->exists());
 
         return $code;

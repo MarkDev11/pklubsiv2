@@ -182,9 +182,15 @@
                                     class="w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 @error('jns_pkl') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror {{ $openingHours && !$openingHours->isPendaftaranBuka() ? 'cursor-not-allowed opacity-60' : '' }}"
                                     required>
                                 <option value="">Pilih Jenis</option>
-                                <option value="Magang" {{ old('jns_pkl', $proposal->jns_pkl ?? '') === 'Magang' ? 'selected' : '' }}>Magang Reguler</option>
-                                <option value="Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)" {{ old('jns_pkl', $proposal->jns_pkl ?? '') === 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)' ? 'selected' : '' }}>Program Merdeka (MSIB / MBKM)</option>
+                                <option value="Magang" {{ old('jns_pkl', $proposal->jns_pkl ?? $user->jenis ?? '') === 'Magang' ? 'selected' : '' }}>Magang Reguler</option>
+                                <option value="Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)" {{ old('jns_pkl', $proposal->jns_pkl ?? $user->jenis ?? '') === 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)' ? 'selected' : '' }}>Program Merdeka (MSIB / MBKM)</option>
                             </select>
+                            @if(!$proposal && $user->jenis)
+                                <p class="mt-1 text-xs text-blue-600 dark:text-blue-400">
+                                    <i class="fa-solid fa-info-circle text-[10px] mr-1"></i>
+                                    Default dari admin: <strong>{{ $user->jenis === 'Magang' ? 'Magang Reguler' : 'Program Magang Khusus' }}</strong>. Anda dapat mengubahnya jika perlu.
+                                </p>
+                            @endif
                             @error('jns_pkl')
                                 <p class="mt-1 text-xs text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror

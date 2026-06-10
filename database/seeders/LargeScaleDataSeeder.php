@@ -147,7 +147,6 @@ class LargeScaleDataSeeder extends Seeder
                 
                 $nim = rand(19, 26) . str_pad($counter, 6, '0', STR_PAD_LEFT);
                 $name = $this->randomName();
-                $jenis = $isMSIB ? 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)' : 'Magang';
                 
                 $userId = $this->userIdCounter++;
                 
@@ -160,7 +159,6 @@ class LargeScaleDataSeeder extends Seeder
                     'password' => $this->hashedPassword,
                     'role' => 'mahasiswa',
                     'nama_dosen_pa' => $dosenNip,
-                    'jenis' => $jenis,
                     'kd_lokal' => rand(10, 15) . '.' . rand(1, 9) . chr(rand(65, 90)) . '.0' . rand(1, 5),
                     'otp_verified' => true,
                     'created_at' => now(),

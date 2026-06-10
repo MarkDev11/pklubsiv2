@@ -26,7 +26,6 @@ class DummyDataSeeder extends Seeder
                 'password' => bcrypt('mhs123'),
                 'role' => 'mahasiswa',
                 'nama_dosen_pa' => $dosen->username,
-                'jenis' => 'Magang',
                 'otp_verified' => true,
             ]);
 
@@ -58,7 +57,6 @@ class DummyDataSeeder extends Seeder
                 'password' => bcrypt('mhs123'),
                 'role' => 'mahasiswa',
                 'nama_dosen_pa' => $dosen->username,
-                'jenis' => 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)',
                 'otp_verified' => true,
             ]);
 

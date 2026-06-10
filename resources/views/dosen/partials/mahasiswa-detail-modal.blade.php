@@ -85,10 +85,6 @@
                                 <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Dosen PA</label>
                                 <p class="mt-1 text-sm font-medium text-gray-900 dark:text-white" x-text="modalData?.user?.nama_dosen_pa || '-'"></p>
                             </div>
-                            <div>
-                                <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Jenis Program</label>
-                                <p class="mt-1 text-sm text-gray-900 dark:text-white" x-text="modalData?.user?.jenis || '-'"></p>
-                            </div>
                         </div>
                     </div>
                     

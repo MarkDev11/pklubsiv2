@@ -47,10 +47,10 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Email</p>
                             <p class="text-sm font-mono text-gray-900 dark:text-white">{{ $user->email ?? '-' }}</p>
                         </div>
-                        @if($user->jenis)
+                        @if($user->proposalMahasiswa?->jns_pkl)
                         <div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jenis Mahasiswa</p>
-                            <p class="text-sm text-gray-900 dark:text-white">{{ $user->jenis }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Jenis PKL</p>
+                            <p class="text-sm text-gray-900 dark:text-white">{{ $user->proposalMahasiswa->jns_pkl }}</p>
                         </div>
                         @endif
                         @if($user->nama_dosen_pa)

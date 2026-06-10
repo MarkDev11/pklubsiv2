@@ -67,7 +67,7 @@ class AkunController extends Controller
 
         $filtered = $query->count();
 
-        $rows = $query->with('dosenPa')
+        $rows = $query->with('dosenPa', 'proposalMahasiswa')
             ->orderBy($orderBy, $orderDir)
             ->offset($start)
             ->limit($length)
@@ -75,12 +75,17 @@ class AkunController extends Controller
 
         $data = [];
         foreach ($rows as $i => $r) {
+            // For mahasiswa with proposals, show jns_pkl; otherwise show legacy jenis
+            $jenis = $r->isMahasiswa() && $r->proposalMahasiswa?->jns_pkl 
+                ? $r->proposalMahasiswa->jns_pkl 
+                : $r->jenis;
+            
             $data[] = [
                 'no' => $start + $i + 1,
                 'username' => e($r->username),
                 'name' => e($r->name),
                 'role' => $r->role,
-                'jenis' => $r->jenis,
+                'jenis' => $jenis,
                 'dosen_pa' => $r->isMahasiswa() ? $r->dosenPaLabel() : null,
                 'kd_lokal' => $r->kd_lokal,
                 'encrypted_id' => encryptUrl($r->username),

@@ -54,6 +54,10 @@ class UserService
     }
 
     /**
+     * Resolve jenis PKL (optional field).
+     * Jenis PKL seharusnya dipilih mahasiswa saat submit proposal, bukan saat create user.
+     * Field ini optional dan hanya untuk legacy/kompatibilitas.
+     *
      * @param  array<string, mixed>  $data
      */
     protected function resolveJenis(array $data): ?string
@@ -62,6 +66,7 @@ class UserService
             return null;
         }
 
+        // Return jenis if provided, null if not (field is optional)
         return $data['jenis'] ?? null;
     }
 

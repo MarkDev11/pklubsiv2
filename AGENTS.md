@@ -79,6 +79,30 @@ There is no `/register` route or public signup form. All users (mahasiswa, dosen
 
 **Note:** Google OAuth is NOT a registration method. Users must exist in the database (with matching `email_bsi`) before they can login via Google. OAuth login attempts with unregistered `@bsi.ac.id` emails will be rejected with error "Email tidak terdaftar dalam sistem."
 
+### PKL Jenis Workflow
+
+**Flexible workflow: Both admin and mahasiswa can set jenis PKL type.**
+
+- **Admin can optionally set jenis:** When admin creates a mahasiswa account (manual or import), the `users.jenis` field is **optional** and serves as a default value. Admin can:
+  - Leave it empty (mahasiswa chooses from scratch during proposal)
+  - Set it to `"Magang"` or `"Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)"` (pre-filled as default)
+- **Mahasiswa chooses jenis in proposal:** When mahasiswa submits their PKL proposal via `/mahasiswa/proposal`, they **must** choose from:
+  - `"Magang"` — Regular internship
+  - `"Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)"` — Special programs (MSIB, MBKM, etc.)
+  - If admin pre-set `users.jenis`, it appears as the default selection (mahasiswa can override)
+- **Authoritative source:** `proposal_mahasiswas.jns_pkl` is the definitive PKL type after proposal submission.
+- **Data hierarchy:** 
+  - `users.jenis` = Optional default value (set by admin)
+  - `proposal.jns_pkl` = Final authoritative value (chosen by mahasiswa, may differ from user.jenis)
+- **File naming:** Uploaded documents (laporan, etc.) use simplified jenis from proposal: "Magang", "PMK", or "PKL" (default).
+
+**Important for developers:**
+- Query by proposal jenis using `ProposalMahasiswa::magang()` or `ProposalMahasiswa::msib()` scopes
+- `users.jenis` is optional and serves as default value only — DO NOT use for filtering or business logic
+- Display views load `proposalMahasiswa` relationship and show `jns_pkl` (authoritative)
+- Admin user list shows `proposal.jns_pkl` for mahasiswa with proposals, fallback to `users.jenis` for display purposes
+- Import system accepts optional jenis column (admin can pre-set defaults for bulk import)
+
 ### Services Layer
 
 Business logic is intentionally separated from controllers. Add domain logic here before bloating controllers:

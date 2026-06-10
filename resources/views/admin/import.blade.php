@@ -168,7 +168,7 @@
                                         <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono font-semibold text-xs border border-gray-200 dark:border-gray-600">F</span>
                                     </td>
                                     <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">
-                                        Jenis Magang <span class="ml-1 text-xs text-gray-400">(opsional)</span>
+                                        Jenis Magang <span class="ml-1 text-xs text-gray-400">(opsional - default mahasiswa)</span>
                                     </td>
                                     <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">
                                         <span class="px-2 py-0.5 rounded border border-gray-300 dark:border-gray-600">Magang / PMK</span>

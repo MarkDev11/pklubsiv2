@@ -46,7 +46,7 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => UserRole::Mahasiswa->value,
-            'jenis' => 'Magang',
+            'jenis' => null, // Jenis PKL dipilih mahasiswa saat submit proposal
             'nama_dosen_pa' => 'DSN000001',
             'kd_lokal' => strtoupper(fake()->lexify('???')),
         ]);

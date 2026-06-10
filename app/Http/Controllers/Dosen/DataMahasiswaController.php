@@ -45,7 +45,6 @@ class DataMahasiswaController extends Controller
                 'email_bsi' => $user->email_bsi,
                 'phone' => $user->phone,
                 'nama_dosen_pa' => $user->dosenPaLabel(),
-                'jenis' => $user->jenis,
                 'kd_lokal' => $user->kd_lokal,
             ],
             'proposal' => $user->proposalMahasiswa ? [

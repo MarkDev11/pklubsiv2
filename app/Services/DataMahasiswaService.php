@@ -28,9 +28,10 @@ class DataMahasiswaService
             ->whereNotNull('lp')->whereNotNull('lpp')->whereNotNull('skp')
             ->with('user')->paginate(50, ['*'], 'tuntas');
 
+        // Mahasiswa yang belum submit proposal tidak punya jns_pkl, jadi tidak perlu filter by jenis
+        // Tampilkan semua mahasiswa dosen ini yang belum submit proposal
         $belumInput = User::where('role', UserRole::Mahasiswa)
             ->where('nama_dosen_pa', $dosen->username)
-            ->where('jenis', $jenisFilter)
             ->whereDoesntHave('proposalMahasiswa')
             ->paginate(50, ['*'], 'belum');
 

@@ -74,14 +74,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="flex flex-col">
-                                    <label class="form-label mb-2"><i class="fa-solid fa-briefcase text-[11px] mr-1.5 text-gray-400"></i>Jenis PKL</label>
-                                    <select name="jenis" class="form-select">
-                                        <option value="">— Pilih —</option>
-                                        <option value="Magang" {{ $user->jenis === 'Magang' ? 'selected' : '' }}>Magang</option>
-                                        <option value="Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)" {{ $user->jenis !== 'Magang' && $user->jenis ? 'selected' : '' }}>PMK/GNIK/MBKM/MSIB/PMMB</option>
-                                    </select>
-                                </div>
                             </div>
                             <div class="flex flex-col">
                                 <label class="form-label mb-2"><i class="fa-solid fa-chalkboard-user text-[11px] mr-1.5 text-gray-400"></i>NIP Dosen PA</label>
@@ -94,6 +86,19 @@
                                     @endforeach
                                 </select>
                                 @error('nama_dosen_pa') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div class="flex flex-col">
+                                <label class="form-label mb-2 text-gray-600 dark:text-gray-400">
+                                    <i class="fa-solid fa-briefcase text-[11px] mr-1.5 text-gray-400"></i>Jenis PKL 
+                                    <span class="text-gray-400 font-normal text-[10px] ml-1">(opsional)</span>
+                                </label>
+                                <select name="jenis" class="form-select bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                                    <option value="">-- Pilih Jenis PKL --</option>
+                                    <option value="Magang" {{ old('jenis', $user->jenis) === 'Magang' ? 'selected' : '' }}>Magang</option>
+                                    <option value="Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)" {{ old('jenis', $user->jenis) === 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)' ? 'selected' : '' }}>Program Magang Khusus (PMK)</option>
+                                </select>
+                                <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Default jenis PKL. Mahasiswa dapat mengubahnya saat submit proposal.</p>
+                                @error('jenis') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                             </div>
                         </div>
                         <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex items-center justify-between">
@@ -180,12 +185,6 @@
                             <span class="text-xs text-gray-500 dark:text-gray-400">Role</span>
                             <span class="text-sm font-semibold text-gray-900 dark:text-white capitalize">{{ $user->role->value }}</span>
                         </div>
-                        @if($user->jenis)
-                        <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700">
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Jenis</span>
-                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $user->jenis }}</span>
-                        </div>
-                        @endif
                         <div class="flex items-center justify-between py-2">
                             <span class="text-xs text-gray-500 dark:text-gray-400">Terdaftar</span>
                             <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ $user->created_at?->format('d M Y') ?? '-' }}</span>

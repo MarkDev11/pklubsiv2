@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\OpeningHour;
+use App\Models\ProposalMahasiswa;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
@@ -32,8 +33,8 @@ class DatabaseSeeder extends Seeder
             'otp_verified' => true,
         ]);
 
-        // Mahasiswa contoh
-        User::create([
+        // Mahasiswa contoh (dengan jenis default dari admin yang di-override saat proposal)
+        $mahasiswa = User::create([
             'name' => 'Ahmad Fauzi',
             'username' => '12345678',
             'email' => 'ahmad@gmail.com',
@@ -41,9 +42,25 @@ class DatabaseSeeder extends Seeder
             'password' => 'mhs123',
             'role' => 'mahasiswa',
             'nama_dosen_pa' => '1234567890',
-            'jenis' => 'Magang',
+            'jenis' => 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)', // Admin pre-set PMK
             'kd_lokal' => '12.7A.01',
             'otp_verified' => true,
+        ]);
+
+        // Proposal untuk mahasiswa (mahasiswa override jenis dari PMK → Magang)
+        // Mendemonstrasikan proposal.jns_pkl adalah authoritative, bukan user.jenis
+        ProposalMahasiswa::create([
+            'user_id' => $mahasiswa->id,
+            'nim' => $mahasiswa->username,
+            'nama' => $mahasiswa->name,
+            'kd_lokal' => $mahasiswa->kd_lokal,
+            'jns_pkl' => 'Magang', // Mahasiswa pilih Magang (berbeda dari default PMK)
+            'judul_pkl' => 'Sistem Informasi Manajemen PKL Berbasis Web',
+            'tempat_riset' => 'PT. Teknologi Indonesia',
+            'nama_mentor' => 'Ibu Sari Dewi',
+            'hp_mentor' => '08123456789',
+            'email_mentor' => 'sari@perusahaan.com',
+            'dosen_pa' => '1234567890',
         ]);
 
         // Mentor contoh

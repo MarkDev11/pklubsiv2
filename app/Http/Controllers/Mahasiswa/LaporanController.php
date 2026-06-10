@@ -42,13 +42,20 @@ class LaporanController extends Controller
 
         $data = [];
         $prefixes = ['lp' => 'laporan', 'lpp' => 'penilaian', 'skp' => 'suratketerangan'];
+        
+        // Use jns_pkl from proposal for file naming (simplified)
+        $jenisFile = match(true) {
+            str_contains($proposal->jns_pkl ?? '', 'Program Magang khusus') => 'PMK',
+            ($proposal->jns_pkl ?? '') === 'Magang' => 'Magang',
+            default => 'PKL'
+        };
 
         foreach (['lp', 'lpp', 'skp'] as $field) {
             if ($request->hasFile($field)) {
                 $this->proposalService->deleteOldFile($proposal->{$field});
                 $data[$field] = $this->proposalService->uploadFile(
                     $request->file($field),
-                    $prefixes[$field].'_'.($user->jenis ?? 'PKL'),
+                    $prefixes[$field].'_'.$jenisFile,
                     $user->username
                 );
             }

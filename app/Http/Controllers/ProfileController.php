@@ -11,7 +11,7 @@ class ProfileController extends Controller
 {
     public function edit(): View
     {
-        $user = $this->authenticatedUser()->load('dosenPa');
+        $user = $this->authenticatedUser()->load('dosenPa', 'proposalMahasiswa');
 
         return view('profile.edit', compact('user'));
     }

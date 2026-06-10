@@ -105,16 +105,6 @@
                                    placeholder="Contoh: 12.7A.01">
                         </div>
 
-                        {{-- Jenis Magang --}}
-                        <div>
-                            <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">Jenis Magang</label>
-                            <select name="jenis" class="form-input w-full bg-white dark:bg-gray-800 border-indigo-200 dark:border-gray-600 rounded-lg text-sm">
-                                <option value="">-- Pilih Jenis --</option>
-                                <option value="Magang" {{ old('jenis') == 'Magang' ? 'selected' : '' }}>Magang</option>
-                                <option value="PMK" {{ old('jenis') == 'PMK' ? 'selected' : '' }}>PMK</option>
-                            </select>
-                        </div>
-
                         {{-- Dosen PA --}}
                         <div>
                             <label class="form-label text-xs font-medium text-gray-700 dark:text-gray-300 mb-1 block">NIP Dosen PA</label>
@@ -127,6 +117,20 @@
                                 @endforeach
                             </select>
                             @error('nama_dosen_pa') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                        </div>
+
+                        {{-- Jenis PKL --}}
+                        <div>
+                            <label class="form-label text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+                                Jenis PKL <span class="text-gray-400 font-normal text-[10px] ml-1">(opsional)</span>
+                            </label>
+                            <select name="jenis" class="form-input w-full bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 rounded-lg text-sm text-gray-600 dark:text-gray-300">
+                                <option value="">-- Pilih Jenis PKL --</option>
+                                <option value="Magang" {{ old('jenis') === 'Magang' ? 'selected' : '' }}>Magang</option>
+                                <option value="Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)" {{ old('jenis') === 'Program Magang khusus (PMK/GNIK/MBKM/MSIB/PMMB)' ? 'selected' : '' }}>Program Magang Khusus (PMK)</option>
+                            </select>
+                            <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-1">Default jenis PKL. Mahasiswa dapat mengubahnya saat submit proposal.</p>
+                            @error('jenis') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>
 

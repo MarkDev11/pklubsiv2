@@ -33,7 +33,7 @@
                     <div>
                         <h4 class="font-semibold text-blue-900 dark:text-blue-300 text-sm">Sebelum Mengupload</h4>
                         <p class="text-sm text-blue-700 dark:text-blue-400 mt-1">
-                            Pastikan data sesuai dengan format yang ditentukan. Username / NIM yang <strong>sudah ada</strong> (duplikat) di sistem akan di-skip otomatis.
+                            Pastikan data sesuai format. Username / NIM yang <strong>sudah ada</strong> akan di-skip. Jika kolom password kosong, password awal otomatis sama dengan nilai di kolom B (username/NIM/NIP) pada baris yang sama.
                         </p>
                     </div>
                 </div>
@@ -68,11 +68,24 @@
                                 </div>
                             </div>
                             
-                            @error('upload_excel')
+                             @error('upload_excel')
                                 <p class="text-red-600 dark:text-red-400 text-sm mt-3 flex items-center gap-1.5">
                                     <i class="fa-solid fa-triangle-exclamation text-xs"></i> {{ $message }}
                                 </p>
                             @enderror
+
+                            <div class="mt-5 rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/20 p-4">
+                                <label class="flex items-start gap-3 text-sm text-amber-800 dark:text-amber-200">
+                                    <input type="checkbox" name="password_default_confirm" value="1" {{ old('password_default_confirm') ? 'checked' : '' }}
+                                           class="mt-1 rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                                     <span>Saya paham baris import dengan password kosong akan menggunakan nilai kolom B (username/NIM/NIP) sebagai password awal. Admin wajib menyampaikan password awal ini ke pemilik akun dan meminta pengguna menggantinya setelah login.</span>
+                                </label>
+                                @error('password_default_confirm')
+                                    <p class="text-red-600 dark:text-red-400 text-sm mt-2 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-triangle-exclamation text-xs"></i> {{ $message }}
+                                    </p>
+                                @enderror
+                            </div>
 
                             <div class="mt-6">
                                 <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors">
@@ -144,8 +157,8 @@
                                     <td class="px-4 py-3">
                                         <span class="inline-flex items-center justify-center w-7 h-7 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 font-mono font-semibold text-xs border border-emerald-200 dark:border-emerald-800/30">C</span>
                                     </td>
-                                    <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">Password</td>
-                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">katasandi123</td>
+                                    <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">Password <span class="ml-1 text-xs text-gray-400">(opsional)</span></td>
+                                    <td class="px-4 py-3 text-gray-500 dark:text-gray-400 text-xs">Kosong = username/NIM/NIP</td>
                                 </tr>
                                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                     <td class="px-4 py-3">

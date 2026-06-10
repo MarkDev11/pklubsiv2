@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="title">Tambah Akun</x-slot>
 
-    <div class="space-y-6 max-w-4xl mx-auto animate-fade-in" x-data="{ role: '{{ old('role', 'mahasiswa') }}' }">
+    <div class="space-y-6 max-w-4xl mx-auto animate-fade-in" x-data="{ role: '{{ old('role', 'mahasiswa') }}', username: @js(old('username', '')) }">
         
         {{-- Breadcrumb --}}
         <div class="flex items-center gap-2 text-sm">
@@ -50,7 +50,7 @@
                             <label class="form-label text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                                 Username / NIM / NIP <span class="text-red-500">*</span>
                             </label>
-                            <input type="text" name="username" value="{{ old('username') }}" required
+                            <input type="text" name="username" value="{{ old('username') }}" x-model="username" required
                                    class="form-input w-full font-mono bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
                                    placeholder="Contoh: 12345678">
                             @error('username') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
@@ -77,10 +77,25 @@
                             </label>
                             <input type="password" name="password"
                                    class="form-input w-full bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 rounded-xl"
-                                   placeholder="Biarkan kosong untuk password default">
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1">Kosongi bidang ini untuk menggunakan password bawaan: <strong class="font-mono text-gray-700 dark:text-gray-300">bs10k3PKL</strong></p>
+                                   placeholder="Kosongkan untuk memakai username sebagai password awal">
+                            <p class="text-[11px] text-amber-600 dark:text-amber-400 mt-1">Jika kosong, password awal otomatis sama dengan username/NIM/NIP.</p>
+                            <div class="mt-2 rounded-lg border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 text-xs text-amber-800 dark:text-amber-200">
+                                Password default jika dikosongkan:
+                                <span class="font-mono font-semibold" x-text="username || 'isi username dulu'"></span>
+                            </div>
                             @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
+                    </div>
+
+                    <div class="rounded-xl border border-amber-200 dark:border-amber-800/40 bg-amber-50 dark:bg-amber-900/20 p-4">
+                        <label class="flex items-start gap-3 text-sm text-amber-800 dark:text-amber-200">
+                            <input type="checkbox" name="password_default_confirm" value="1" {{ old('password_default_confirm') ? 'checked' : '' }}
+                                   class="mt-1 rounded border-amber-300 text-amber-600 focus:ring-amber-500">
+                            <span>
+                                Saya paham jika password dikosongkan, sistem akan menggunakan username/NIM/NIP sebagai password awal akun. Admin wajib menyampaikan password awal ini ke pemilik akun dan meminta pengguna menggantinya setelah login.
+                            </span>
+                        </label>
+                        @error('password_default_confirm') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- Form Tambahan Khusus Mahasiswa --}}

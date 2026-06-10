@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\UserRole;
+use App\Models\ActivityLog;
+use App\Models\ProposalMahasiswa;
 use App\Models\User;
 use Illuminate\Support\Str;
 
@@ -13,7 +15,7 @@ class UserService
      */
     public function createAccount(array $data): User
     {
-        $password = $data['password'] ?? $this->generateSecurePassword();
+        $password = ($data['password'] ?? null) ?: $data['username'];
 
         $user = User::create([
             'name' => $data['name'],
@@ -89,11 +91,45 @@ class UserService
             throw new \Exception('Akun admin tidak dapat dihapus.');
         }
 
+        if ($this->hasSystemRelations($user)) {
+            throw new \Exception('Akun tidak dapat dihapus karena sudah memiliki data atau relasi PKL.');
+        }
+
         $user->delete();
     }
 
     public function resetPassword(User $user, string $newPassword): void
     {
         $user->update(['password' => $newPassword]);
+    }
+
+    public function hasSystemRelations(User $user): bool
+    {
+        if (ActivityLog::where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        if ($user->isMahasiswa() && ProposalMahasiswa::where('user_id', $user->id)->exists()) {
+            return true;
+        }
+
+        if ($user->isDosen()) {
+            return User::mahasiswa()->where('nama_dosen_pa', $user->username)->exists()
+                || ProposalMahasiswa::where('dosen_pa', $user->username)->exists();
+        }
+
+        if ($user->isMentor()) {
+            return ProposalMahasiswa::where('email_mentor', $user->username)->exists();
+        }
+
+        return false;
+    }
+
+    public function usernameHasRelations(User $user): bool
+    {
+        return ProposalMahasiswa::where('dosen_pa', $user->username)->exists()
+            || User::mahasiswa()->where('nama_dosen_pa', $user->username)->exists()
+            || ProposalMahasiswa::where('email_mentor', $user->username)->exists()
+            || ProposalMahasiswa::where('nim', $user->username)->exists();
     }
 }

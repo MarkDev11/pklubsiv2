@@ -5,6 +5,7 @@ namespace App\Http\Requests\Admin;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreAkunRequest extends FormRequest
 {
@@ -23,6 +24,7 @@ class StoreAkunRequest extends FormRequest
             'username' => ['required', 'string', 'max:100', 'unique:users,username'],
             'role' => ['required', Rule::in(UserRole::values())],
             'password' => ['nullable', 'string', 'min:8'],
+            'password_default_confirm' => ['nullable'],
             'jenis' => ['nullable', 'string', 'max:50'],
             'nama_dosen_pa' => [
                 Rule::requiredIf(fn () => $this->input('role') === UserRole::Mahasiswa->value),
@@ -41,5 +43,18 @@ class StoreAkunRequest extends FormRequest
             'nama_dosen_pa.required' => 'NIP Dosen PA wajib diisi untuk mahasiswa.',
             'nama_dosen_pa.exists' => 'NIP Dosen PA tidak ditemukan atau bukan akun dosen.',
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if (filled($this->input('password'))) {
+                return;
+            }
+
+            if (! $this->boolean('password_default_confirm')) {
+                $validator->errors()->add('password_default_confirm', 'Konfirmasi penggunaan username sebagai password awal wajib dicentang jika password dikosongkan.');
+            }
+        });
     }
 }

@@ -56,15 +56,23 @@ class UpdateAkunRequest extends FormRequest
         $validator->after(function (Validator $validator) {
             $target = $this->targetUser();
 
-            if (! $target || ! $target->isDosen() || $target->username === $this->input('username')) {
+            if (! $target) {
                 return;
             }
 
-            $hasStudents = User::mahasiswa()->where('nama_dosen_pa', $target->username)->exists();
-            $hasProposals = ProposalMahasiswa::where('dosen_pa', $target->username)->exists();
+            $hasDosenRelations = User::mahasiswa()->where('nama_dosen_pa', $target->username)->exists()
+                || ProposalMahasiswa::where('dosen_pa', $target->username)->exists();
+            $hasMentorRelations = ProposalMahasiswa::where('email_mentor', $target->username)->exists();
+            $hasMahasiswaRelations = ProposalMahasiswa::where('nim', $target->username)->exists()
+                || ProposalMahasiswa::where('user_id', $target->id)->exists();
+            $hasUsernameRelations = $hasDosenRelations || $hasMentorRelations || $hasMahasiswaRelations;
 
-            if ($hasStudents || $hasProposals) {
-                $validator->errors()->add('username', 'NIP dosen tidak dapat diubah karena sudah direferensikan mahasiswa atau proposal.');
+            if ($hasUsernameRelations && $target->username !== $this->input('username')) {
+                $validator->errors()->add('username', 'Username tidak dapat diubah karena sudah direferensikan data PKL.');
+            }
+
+            if ($hasUsernameRelations && $target->role->value !== $this->input('role')) {
+                $validator->errors()->add('role', 'Role tidak dapat diubah karena akun sudah memiliki relasi data PKL.');
             }
         });
     }

@@ -7,6 +7,7 @@ use App\Models\ProposalMahasiswa;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -99,6 +100,122 @@ class ProposalControllerTest extends TestCase
         $this->assertDatabaseHas('proposal_mahasiswas', [
             'id' => $proposal->id,
             'judul_pkl' => 'Updated Title',
+        ]);
+    }
+
+    public function test_update_proposal_creates_new_mentor_account_when_email_changes(): void
+    {
+        $oldMentor = User::factory()->mentor()->create([
+            'name' => 'Old Mentor',
+            'username' => 'old-mentor@test.com',
+            'email' => 'old-mentor@test.com',
+            'phone' => '08111111111',
+        ]);
+
+        $proposal = ProposalMahasiswa::factory()->create([
+            'user_id' => $this->mahasiswa->id,
+            'nim' => $this->mahasiswa->username,
+            'nama_mentor' => $oldMentor->name,
+            'hp_mentor' => $oldMentor->phone,
+            'email_mentor' => $oldMentor->username,
+        ]);
+
+        $response = $this->actingAs($this->mahasiswa)->put(route('mahasiswa.proposal.update'), [
+            'nim' => $this->mahasiswa->username,
+            'nama' => $this->mahasiswa->name,
+            'jns_pkl' => 'Magang',
+            'judul_pkl' => 'Updated Title',
+            'tempat_riset' => 'Updated Company',
+            'nama_mentor' => 'New Mentor',
+            'hp_mentor' => '08222222222',
+            'email_mentor' => 'new-mentor@test.com',
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.proposal.index'));
+
+        $this->assertDatabaseHas('proposal_mahasiswas', [
+            'id' => $proposal->id,
+            'email_mentor' => 'new-mentor@test.com',
+            'nama_mentor' => 'New Mentor',
+            'hp_mentor' => '08222222222',
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'username' => 'old-mentor@test.com',
+            'role' => 'mentor',
+        ]);
+
+        $newMentor = User::where('username', 'new-mentor@test.com')->firstOrFail();
+        $this->assertTrue($newMentor->isMentor());
+        $this->assertSame('New Mentor', $newMentor->name);
+        $this->assertSame('08222222222', $newMentor->phone);
+        $this->assertTrue(Hash::check('08222222222', $newMentor->password));
+    }
+
+    public function test_update_proposal_syncs_existing_mentor_name_and_phone_without_changing_password(): void
+    {
+        $mentor = User::factory()->mentor()->create([
+            'name' => 'Old Mentor Name',
+            'username' => 'mentor-existing@test.com',
+            'email' => 'mentor-existing@test.com',
+            'password' => 'old-password',
+            'phone' => '08111111111',
+        ]);
+
+        ProposalMahasiswa::factory()->create([
+            'user_id' => $this->mahasiswa->id,
+            'nim' => $this->mahasiswa->username,
+            'email_mentor' => $mentor->username,
+        ]);
+
+        $response = $this->actingAs($this->mahasiswa)->put(route('mahasiswa.proposal.update'), [
+            'nim' => $this->mahasiswa->username,
+            'nama' => $this->mahasiswa->name,
+            'jns_pkl' => 'Magang',
+            'judul_pkl' => 'Updated Title',
+            'tempat_riset' => 'Updated Company',
+            'nama_mentor' => 'Correct Mentor Name',
+            'hp_mentor' => '08333333333',
+            'email_mentor' => 'mentor-existing@test.com',
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.proposal.index'));
+
+        $mentor->refresh();
+        $this->assertSame('Correct Mentor Name', $mentor->name);
+        $this->assertSame('08333333333', $mentor->phone);
+        $this->assertTrue(Hash::check('old-password', $mentor->password));
+    }
+
+    public function test_update_proposal_rejects_mentor_email_used_by_non_mentor(): void
+    {
+        $nonMentor = User::factory()->dosen()->create([
+            'username' => 'not-mentor@test.com',
+            'email' => 'not-mentor@test.com',
+        ]);
+
+        $proposal = ProposalMahasiswa::factory()->create([
+            'user_id' => $this->mahasiswa->id,
+            'nim' => $this->mahasiswa->username,
+            'email_mentor' => 'mentor@test.com',
+        ]);
+
+        $response = $this->actingAs($this->mahasiswa)->put(route('mahasiswa.proposal.update'), [
+            'nim' => $this->mahasiswa->username,
+            'nama' => $this->mahasiswa->name,
+            'jns_pkl' => 'Magang',
+            'judul_pkl' => 'Updated Title',
+            'tempat_riset' => 'Updated Company',
+            'nama_mentor' => 'Invalid Mentor',
+            'hp_mentor' => '08444444444',
+            'email_mentor' => $nonMentor->username,
+        ]);
+
+        $response->assertSessionHasErrors('email_mentor');
+
+        $this->assertDatabaseHas('proposal_mahasiswas', [
+            'id' => $proposal->id,
+            'email_mentor' => 'mentor@test.com',
         ]);
     }
 

@@ -74,28 +74,16 @@
                            class="w-full pl-10 pr-4 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 </div>
 
-                {{-- PDF Export & Per Page --}}
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                    <a href="{{ route('admin.pdf.pkl') }}" target="_blank"
-                       class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Rekap PKL</span>
-                    </a>
-                    <a href="{{ route('admin.pdf.msib') }}" target="_blank"
-                       class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <span>Rekap MSIB</span>
-                    </a>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm text-gray-500 dark:text-gray-400">Show:</span>
-                        <select x-model="perPage" @change="currentPage = 1; fetchData()"
-                                class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="10">10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
+                {{-- Per Page --}}
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Show:</span>
+                    <select x-model="perPage" @change="currentPage = 1; fetchData()"
+                            class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
                 </div>
             </div>
 
@@ -137,7 +125,7 @@
                                         <span class="font-medium text-gray-900 dark:text-white" x-text="r.nama"></span>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div x-html="r.jenis"></div>
+                                        <span class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded" :class="r.jenis_class" x-text="r.jenis_label"></span>
                                     </td>
                                     <td class="px-4 py-3">
                                         <span class="text-gray-700 dark:text-gray-300" x-text="r.tempat || '-'"></span>
@@ -146,7 +134,7 @@
                                         <span class="text-gray-600 dark:text-gray-400" x-text="r.mentor || '-'"></span>
                                     </td>
                                     <td class="px-4 py-3 text-center">
-                                        <div x-html="r.status"></div>
+                                        <span class="inline-flex items-center text-xs font-medium px-2 py-0.5 rounded" :class="r.status_class" x-text="r.status_label"></span>
                                     </td>
                                 </tr>
                             </template>

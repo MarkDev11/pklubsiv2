@@ -30,7 +30,7 @@ class ProposalService
                 ]);
             }
 
-            $this->ensureMentorAccountExists(
+            $this->syncMentorAccount(
                 $data['email_mentor'],
                 $data['nama_mentor'],
                 $data['hp_mentor']
@@ -120,6 +120,12 @@ class ProposalService
                 'nama_mentor', 'hp_mentor', 'email_mentor', 'email_perusahaan',
             ])->toArray();
 
+            $this->syncMentorAccount(
+                $data['email_mentor'],
+                $data['nama_mentor'],
+                $data['hp_mentor']
+            );
+
             if ($skmFile) {
                 $this->deleteOldFile($proposal->skm);
                 // Use authenticated user's username (NIM) for filename, not request data
@@ -160,19 +166,33 @@ class ProposalService
         }
     }
 
-    protected function ensureMentorAccountExists(string $email, string $name, string $phone): void
+    protected function syncMentorAccount(string $email, string $name, string $phone): void
     {
-        if (User::where('username', $email)->exists()) {
+        $mentor = User::where('username', $email)->first();
+
+        if ($mentor && ! $mentor->isMentor()) {
+            throw ValidationException::withMessages([
+                'email_mentor' => 'Email mentor sudah digunakan oleh akun non-mentor.',
+            ]);
+        }
+
+        if ($mentor) {
+            $mentor->update([
+                'name' => $name,
+                'email' => $email,
+                'phone' => $phone,
+            ]);
+
             return;
         }
 
-    User::create([
-        'name' => $name,
-        'username' => $email,
-        'email' => $email,
-        'password' => $phone,
-        'role' => UserRole::Mentor->value,
-        'phone' => $phone,
-    ]);
+        User::create([
+            'name' => $name,
+            'username' => $email,
+            'email' => $email,
+            'password' => $phone,
+            'role' => UserRole::Mentor->value,
+            'phone' => $phone,
+        ]);
     }
 }

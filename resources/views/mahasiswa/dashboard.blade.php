@@ -13,36 +13,41 @@
         </p>
     </div>
 
-    @if($proposal)
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <!-- Administrasi -->
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Administrasi</h3>
-                <div class="w-9 h-9 rounded-md flex items-center justify-center {{ $proposal->skm ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' }}">
-                    @if($proposal->skm)
+                <div class="w-9 h-9 rounded-md flex items-center justify-center {{ $proposal?->skm ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' }}">
+                    @if($proposal?->skm)
                         <i class="fa-solid fa-check"></i>
                     @else
                         <i class="fa-solid fa-hourglass-half"></i>
                     @endif
                 </div>
             </div>
-            @if($proposal->skm)
+            @if($proposal?->skm)
                 <p class="text-base font-semibold text-gray-900 dark:text-white">SKM Selesai</p>
                 <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">Terverifikasi</p>
-            @else
+            @elseif($proposal)
                 <p class="text-base font-semibold text-gray-900 dark:text-white">Menunggu</p>
                 <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Proses verifikasi</p>
+            @else
+                <p class="text-base font-semibold text-gray-900 dark:text-white">Belum Input</p>
+                <p class="text-xs text-amber-600 dark:text-amber-400 mt-0.5">Data PKL belum dibuat</p>
+                <a href="{{ route('mahasiswa.proposal.index') }}" class="inline-flex items-center gap-1 mt-3 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                    Input Data PKL <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                </a>
             @endif
         </div>
 
         <!-- Dokumen -->
         @php
             $uploadCount = 0;
-            if($proposal->lp) $uploadCount++;
-            if($proposal->lpp) $uploadCount++;
-            if($proposal->skp) $uploadCount++;
+            if($proposal?->lp) $uploadCount++;
+            if($proposal?->lpp) $uploadCount++;
+            if($proposal?->skp) $uploadCount++;
         @endphp
 
         <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
@@ -56,8 +61,8 @@
                 <span class="text-3xl font-semibold tabular-nums {{ $uploadCount === 3 ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-900 dark:text-white' }}">{{ $uploadCount }}</span>
                 <span class="text-sm text-gray-500 dark:text-gray-400">/ 3 file diupload</span>
             </div>
-            <a href="{{ route('mahasiswa.laporan.index') }}" class="inline-flex items-center gap-1 mt-3 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-                Kelola dokumen <i class="fa-solid fa-arrow-right text-[10px]"></i>
+            <a href="{{ $proposal ? route('mahasiswa.laporan.index') : route('mahasiswa.proposal.index') }}" class="inline-flex items-center gap-1 mt-3 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
+                {{ $proposal ? 'Kelola dokumen' : 'Input Data PKL dulu' }} <i class="fa-solid fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
@@ -69,15 +74,18 @@
                     <i class="fa-solid fa-star"></i>
                 </div>
             </div>
-            @if($proposal->nilai > 0)
+            @if($proposal && $proposal->nilai > 0)
                 <div class="flex items-baseline gap-2">
                     <span class="text-3xl font-semibold text-gray-900 dark:text-white tabular-nums">{{ $proposal->nilai }}</span>
                     <span class="text-sm text-gray-500 dark:text-gray-400">/ 100</span>
                 </div>
                 <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">Telah dinilai</p>
-            @else
+            @elseif($proposal)
                 <p class="text-base font-semibold text-gray-900 dark:text-white">Belum tersedia</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Menunggu input nilai</p>
+            @else
+                <p class="text-base font-semibold text-gray-900 dark:text-white">Belum tersedia</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Input Data PKL terlebih dulu</p>
             @endif
         </div>
     </div>
@@ -92,7 +100,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">NIM</p>
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white font-mono">{{ $proposal->nim }}</p>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white font-mono">{{ $proposal?->nim ?? auth()->user()->username }}</p>
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Nama</p>
@@ -100,8 +108,8 @@
                     </div>
                     <div>
                         <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Status SKM</p>
-                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border {{ $proposal->skm ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30' }}">
-                            {{ $proposal->skm ? 'Selesai' : 'Menunggu' }}
+                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border {{ $proposal?->skm ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30' }}">
+                            {{ $proposal ? ($proposal->skm ? 'Selesai' : 'Menunggu') : 'Belum Input' }}
                         </span>
                     </div>
                     <div>
@@ -127,13 +135,13 @@
                         <p class="text-xs text-gray-500 dark:text-gray-400">Lihat detail pengajuan</p>
                     </div>
                 </a>
-                <a href="{{ route('mahasiswa.laporan.index') }}" class="flex items-center gap-3 p-3 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:border-blue-300 dark:hover:border-blue-700 group transition-colors">
+                <a href="{{ $proposal ? route('mahasiswa.laporan.index') : route('mahasiswa.proposal.index') }}" class="flex items-center gap-3 p-3 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:border-blue-300 dark:hover:border-blue-700 group transition-colors">
                     <div class="w-9 h-9 rounded-md bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-cloud-arrow-up"></i>
                     </div>
                     <div class="min-w-0">
                         <p class="text-sm font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400">Upload Laporan</p>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Kelola dokumen laporan</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $proposal ? 'Kelola dokumen laporan' : 'Input Data PKL lebih dulu' }}</p>
                     </div>
                 </a>
             </div>
@@ -191,21 +199,6 @@
                 </div>
             @endif
         </div>
-    </div>
-    @endif
-
-    @else
-    <!-- Empty State -->
-    <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-12 text-center">
-        <div class="w-16 h-16 mx-auto mb-4 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-            <i class="fa-solid fa-file-circle-plus text-2xl text-blue-600 dark:text-blue-400"></i>
-        </div>
-        <h2 class="text-base font-semibold text-gray-900 dark:text-white mb-1">Belum Ada Data PKL</h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-md mx-auto">Silakan lengkapi formulir pendaftaran untuk memulai proses administrasi.</p>
-        <a href="{{ route('mahasiswa.proposal.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors">
-            <i class="fa-solid fa-plus"></i>
-            Input Data PKL
-        </a>
     </div>
     @endif
 

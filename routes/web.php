@@ -189,12 +189,12 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/nilai/pkl', [DosenNilaiController::class, 'pklIndex'])->name('nilai.pkl');
         Route::get('/nilai/msib', [DosenNilaiController::class, 'msibIndex'])->name('nilai.msib');
-        Route::post('/nilai/save', [DosenNilaiController::class, 'saveNilai'])->name('nilai.save');
+        Route::post('/nilai/save', [DosenNilaiController::class, 'saveNilai'])->middleware('throttle:60,1')->name('nilai.save');
 
         Route::get('/pdf/pkl', [DosenNilaiController::class, 'generatePdfPkl'])->name('pdf.pkl');
         Route::get('/pdf/msib', [DosenNilaiController::class, 'generatePdfMsib'])->name('pdf.msib');
-        Route::post('/exports/pkl', [DosenNilaiController::class, 'exportPkl'])->name('exports.pkl');
-        Route::post('/exports/msib', [DosenNilaiController::class, 'exportMsib'])->name('exports.msib');
+        Route::post('/exports/pkl', [DosenNilaiController::class, 'exportPkl'])->middleware('throttle:5,1')->name('exports.pkl');
+        Route::post('/exports/msib', [DosenNilaiController::class, 'exportMsib'])->middleware('throttle:5,1')->name('exports.msib');
     });
 
     /*

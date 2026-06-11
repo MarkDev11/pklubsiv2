@@ -24,7 +24,7 @@
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
             <form method="GET" action="{{ route('dosen.nilai.msib') }}"
                   x-data="{
-                      search: '{{ request('search') }}',
+                      search: @js(request('search', '')),
                       submitForm() { $el.submit(); }
                   }"
                   class="flex flex-col lg:flex-row gap-3">
@@ -226,8 +226,15 @@
                                             </div>
                                         </template>
                                     </div>
-                                    <p x-show="status === 'error'" x-text="errorMessage" x-cloak class="mt-1 text-[10px] text-rose-600 dark:text-rose-400"></p>
-                                </td>
+                                     <p x-show="status === 'error'" x-text="errorMessage" x-cloak class="mt-1 text-[10px] text-rose-600 dark:text-rose-400"></p>
+                                     @if(!isset($openingHours) || $openingHours->isNilaiBuka())
+                                         <button type="button" @click="save" :disabled="status === 'saving' || nilai === null || nilai === ''"
+                                                 class="mt-2 inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:dark:bg-gray-700 disabled:text-gray-500 text-white transition-colors">
+                                             <i class="fa-solid fa-save text-[10px]"></i>
+                                             Simpan
+                                         </button>
+                                     @endif
+                                 </td>
 
                                 <td class="px-4 py-3">
                                     <div class="text-xs space-y-1">

@@ -7,6 +7,7 @@ use App\Mail\SystemNotification;
 use App\Models\ActivityLog;
 use App\Models\ProposalMahasiswa;
 use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -34,10 +35,15 @@ class NilaiService
      */
     public function saveNilai(array $formIds, array $nilaiInputs, User $rater, callable $scopeQuery): void
     {
+        $existingIds = ProposalMahasiswa::whereIn('id', $formIds)->pluck('id')->all();
         $proposals = ProposalMahasiswa::whereIn('id', $formIds)
             ->where(fn ($q) => $scopeQuery($q))
             ->get()
             ->keyBy('id');
+
+        if ($proposals->count() !== count(array_unique($existingIds))) {
+            throw new AuthorizationException('Anda tidak berhak mengubah nilai mahasiswa ini.');
+        }
 
         $proposalsToNotify = collect();
 

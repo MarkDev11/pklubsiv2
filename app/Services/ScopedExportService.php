@@ -8,12 +8,36 @@ use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class ScopedExportService
 {
+    protected const MAX_RECORDS = 1000;
+
     public function create(User $user, Builder $query, string $category, string $type): Export
     {
         $type = $type === 'excel' ? 'excel' : 'pdf';
+        $existingExport = Export::where('user_id', $user->id)
+            ->where('category', $category)
+            ->where('type', $type)
+            ->where('status', 'completed')
+            ->where('expires_at', '>', now())
+            ->whereNotNull('path')
+            ->latest()
+            ->first();
+
+        if ($existingExport && $existingExport->path && Storage::exists($existingExport->path)) {
+            return $existingExport;
+        }
+
+        $count = (clone $query)->count();
+
+        if ($count > self::MAX_RECORDS) {
+            throw ValidationException::withMessages([
+                'type' => "Terlalu banyak data ({$count} records). Maksimal ".self::MAX_RECORDS.'.',
+            ]);
+        }
+
         $records = $query->with(['user', 'dosenPaUser'])->get();
         $timestamp = now()->format('Ymd_His');
         $filename = "{$user->role->value}_{$category}_{$type}_{$timestamp}." . ($type === 'pdf' ? 'pdf' : 'csv');
@@ -34,8 +58,8 @@ class ScopedExportService
             'user_id' => $user->id,
             'type' => $type,
             'category' => $category,
-            'total_records' => $records->count(),
-            'processed_records' => $records->count(),
+            'total_records' => $count,
+            'processed_records' => $count,
             'status' => 'completed',
             'filename' => $filename,
             'path' => $path,
@@ -78,16 +102,16 @@ class ScopedExportService
 
         foreach ($records as $record) {
             fputcsv($handle, [
-                $record->nim,
-                $record->nama,
-                $record->judul_pkl,
-                $record->tempat_riset,
-                $record->nama_mentor,
-                $record->email_perusahaan,
-                $record->dosenPaLabel(),
+                $this->escapeCsvValue($record->nim),
+                $this->escapeCsvValue($record->nama),
+                $this->escapeCsvValue($record->judul_pkl),
+                $this->escapeCsvValue($record->tempat_riset),
+                $this->escapeCsvValue($record->nama_mentor),
+                $this->escapeCsvValue($record->email_perusahaan),
+                $this->escapeCsvValue($record->dosenPaLabel()),
                 $record->nilai,
-                $record->penilai,
-                $record->updated_at?->format('d/m/Y H:i'),
+                $this->escapeCsvValue($record->penilai),
+                $this->escapeCsvValue($record->updated_at?->format('d/m/Y H:i')),
             ]);
         }
 
@@ -96,5 +120,14 @@ class ScopedExportService
         fclose($handle);
 
         return $csv;
+    }
+
+    protected function escapeCsvValue(mixed $value): mixed
+    {
+        if (! is_string($value) || $value === '') {
+            return $value;
+        }
+
+        return in_array($value[0], ['=', '+', '-', '@'], true) ? "'{$value}" : $value;
     }
 }

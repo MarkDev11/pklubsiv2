@@ -211,11 +211,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/nilai/pkl', [MentorNilaiController::class, 'pklIndex'])->name('nilai.pkl');
         Route::get('/nilai/msib', [MentorNilaiController::class, 'msibIndex'])->name('nilai.msib');
-        Route::post('/nilai/save', [MentorNilaiController::class, 'saveNilai'])->name('nilai.save');
+        Route::post('/nilai/save', [MentorNilaiController::class, 'saveNilai'])->middleware('throttle:60,1')->name('nilai.save');
 
         Route::get('/pdf/pkl', [MentorNilaiController::class, 'generatePdfPkl'])->name('pdf.pkl');
         Route::get('/pdf/msib', [MentorNilaiController::class, 'generatePdfMsib'])->name('pdf.msib');
-        Route::post('/exports/pkl', [MentorNilaiController::class, 'exportPkl'])->name('exports.pkl');
-        Route::post('/exports/msib', [MentorNilaiController::class, 'exportMsib'])->name('exports.msib');
     });
 });

@@ -9,9 +9,6 @@ use App\Models\ProposalMahasiswa;
 use App\Services\DashboardService;
 use App\Services\NilaiService;
 use App\Services\PdfService;
-use App\Services\ScopedExportService;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -21,7 +18,6 @@ class NilaiController extends Controller
         protected NilaiService $nilaiService,
         protected PdfService $pdfService,
         protected DashboardService $dashboardService,
-        protected ScopedExportService $scopedExportService,
     ) {}
 
     public function pklIndex(): View
@@ -66,9 +62,8 @@ class NilaiController extends Controller
 
         $proposals = $query->paginate(50)->withQueryString();
         $openingHours = $this->dashboardService->getOpeningHours();
-        $exportHistory = $this->scopedExportService->history($user, 'pkl');
 
-        return view('mentor.nilai-pkl', compact('proposals', 'openingHours', 'exportHistory'));
+        return view('mentor.nilai-pkl', compact('proposals', 'openingHours'));
     }
 
     public function msibIndex(): View
@@ -113,9 +108,8 @@ class NilaiController extends Controller
 
         $proposals = $query->paginate(50)->withQueryString();
         $openingHours = $this->dashboardService->getOpeningHours();
-        $exportHistory = $this->scopedExportService->history($user, 'msib');
 
-        return view('mentor.nilai-msib', compact('proposals', 'openingHours', 'exportHistory'));
+        return view('mentor.nilai-msib', compact('proposals', 'openingHours'));
     }
 
     public function saveNilai(SaveNilaiRequest $request): mixed
@@ -158,28 +152,5 @@ class NilaiController extends Controller
         $user = $this->authenticatedUser();
 
         return $this->pdfService->streamMsibPdf($user);
-    }
-
-    public function exportPkl(Request $request): RedirectResponse
-    {
-        return $this->createExport($request, 'pkl');
-    }
-
-    public function exportMsib(Request $request): RedirectResponse
-    {
-        return $this->createExport($request, 'msib');
-    }
-
-    protected function createExport(Request $request, string $category): RedirectResponse
-    {
-        $validated = $request->validate([
-            'type' => ['required', 'in:pdf,excel'],
-        ]);
-
-        $user = $this->authenticatedUser();
-        $query = $this->scopedExportService->mentorQuery($user, $category);
-        $this->scopedExportService->create($user, $query, $category, $validated['type']);
-
-        return back()->with('success', "Export {$category} berhasil dibuat. File aktif selama 1 jam.");
     }
 }

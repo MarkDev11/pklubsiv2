@@ -129,6 +129,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/import', [ImportController::class, 'index'])->name('import.index');
         Route::post('/import', [ImportController::class, 'import'])->name('import.store');
+        Route::get('/import/{import}/progress', [ImportController::class, 'progress'])->name('import.progress');
+        Route::post('/import/{import}/chunk', [ImportController::class, 'processChunk'])->name('import.chunk');
+        Route::post('/import/{import}/finalize', [ImportController::class, 'finalize'])->name('import.finalize');
 
         Route::get('/tanggal', [OpeningHourController::class, 'index'])->name('tanggal.index');
         Route::put('/tanggal', [OpeningHourController::class, 'update'])->name('tanggal.update');

@@ -203,8 +203,8 @@
                                 </li>
 
                                 <li>
-                                    <a href="{{ route('dosen.nilai.pkl') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('dosen.nilai.pkl') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
+                                    <a href="{{ route('dosen.exports.pkl.index') }}"
+                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('dosen.exports.pkl.index') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
                                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                         </svg>
@@ -216,8 +216,8 @@
                                 </li>
 
                                 <li>
-                                    <a href="{{ route('dosen.nilai.msib') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('dosen.nilai.msib') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
+                                    <a href="{{ route('dosen.exports.msib.index') }}"
+                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('dosen.exports.msib.index') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
                                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                         </svg>
@@ -230,86 +230,27 @@
 
                             @elseif($role === 'mentor')
                                 <li>
-                                    <a href="{{ route('mentor.mahasiswa.pkl') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.mahasiswa.pkl') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
+                                    <a href="{{ route('mentor.mahasiswa.index') }}"
+                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.mahasiswa.*') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
                                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
                                         </svg>
                                         <span class="font-medium whitespace-nowrap transition-opacity duration-300"
                                               :class="(sidebarExpanded || window.innerWidth < 1024) ? 'opacity-100' : 'opacity-0 lg:opacity-0'">
-                                            Mahasiswa PKL
+                                            Mahasiswa
                                         </span>
                                     </a>
                                 </li>
 
                                 <li>
-                                    <a href="{{ route('mentor.nilai.pkl') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.nilai.pkl') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
+                                    <a href="{{ route('mentor.nilai.index') }}"
+                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.nilai.*') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
                                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
                                         </svg>
                                         <span class="font-medium whitespace-nowrap transition-opacity duration-300"
                                               :class="(sidebarExpanded || window.innerWidth < 1024) ? 'opacity-100' : 'opacity-0 lg:opacity-0'">
                                             Penilaian
-                                        </span>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{ route('mentor.mahasiswa.msib') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.mahasiswa.msib') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                        </svg>
-                                        <span class="font-medium whitespace-nowrap transition-opacity duration-300"
-                                              :class="(sidebarExpanded || window.innerWidth < 1024) ? 'opacity-100' : 'opacity-0 lg:opacity-0'">
-                                            Mahasiswa MSIB
-                                        </span>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{ route('mentor.nilai.msib') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.nilai.msib') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
-                                        </svg>
-                                        <span class="font-medium whitespace-nowrap transition-opacity duration-300"
-                                              :class="(sidebarExpanded || window.innerWidth < 1024) ? 'opacity-100' : 'opacity-0 lg:opacity-0'">
-                                            Penilaian MSIB
-                                        </span>
-                                    </a>
-                                </li>
-
-                                {{-- Section: Export Berkas --}}
-                                <li class="pt-5 pb-1" x-show="sidebarExpanded || window.innerWidth < 1024" x-transition>
-                                    <div class="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                                        Export Berkas
-                                    </div>
-                                </li>
-
-                                <li>
-                                    <a href="{{ route('mentor.nilai.pkl') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.nilai.pkl') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                        </svg>
-                                        <span class="font-medium whitespace-nowrap transition-opacity duration-300"
-                                              :class="(sidebarExpanded || window.innerWidth < 1024) ? 'opacity-100' : 'opacity-0 lg:opacity-0'">
-                                            Export PKL
-                                        </span>
-                                    </a>
-                                </li>
-
-                                <li>
-                                    <a href="{{ route('mentor.nilai.msib') }}"
-                                       class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 {{ request()->routeIs('mentor.nilai.msib') ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-md shadow-blue-500/30' : 'text-gray-700 dark:text-gray-300 hover:bg-white/60 dark:hover:bg-gray-700/60 hover:shadow-sm' }}">
-                                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                        </svg>
-                                        <span class="font-medium whitespace-nowrap transition-opacity duration-300"
-                                              :class="(sidebarExpanded || window.innerWidth < 1024) ? 'opacity-100' : 'opacity-0 lg:opacity-0'">
-                                            Export MSIB
                                         </span>
                                     </a>
                                 </li>

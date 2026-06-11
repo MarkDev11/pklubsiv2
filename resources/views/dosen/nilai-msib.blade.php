@@ -273,11 +273,5 @@
             @endif
         </div>
 
-        @include('partials.scoped-export-panel', [
-            'exportAction' => route('dosen.exports.msib'),
-            'exportCategory' => 'msib',
-            'exportHistory' => $exportHistory,
-        ])
-
     </div>
 </x-app-layout>

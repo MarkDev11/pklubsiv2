@@ -81,17 +81,71 @@
             </div>
         </div>
 
+        {{-- Timeline Sistem --}}
+        @if($deadline)
+            <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-blue-500"></i>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Timeline Sistem</h2>
+                </div>
+
+                <div class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @php
+                        $now = now();
+                        $timelineItems = [
+                            ['label' => 'Input Data PKL', 'open' => $deadline->open_time, 'close' => $deadline->close_time, 'icon' => 'fa-file-lines'],
+                            ['label' => 'Upload Laporan', 'open' => $deadline->open_laporan, 'close' => $deadline->close_laporan, 'icon' => 'fa-cloud-arrow-up'],
+                            ['label' => 'Input Nilai', 'open' => $deadline->open_nilai, 'close' => $deadline->close_nilai, 'icon' => 'fa-star'],
+                        ];
+                    @endphp
+
+                    @foreach($timelineItems as $item)
+                        @if($item['open'] && $item['close'])
+                            @php
+                                $open = \Carbon\Carbon::parse($item['open']);
+                                $close = \Carbon\Carbon::parse($item['close']);
+                                $isClosed = $now->gt($close);
+                                $isPending = $now->lt($open);
+                            @endphp
+
+                            <div class="p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-md flex items-center justify-center {{ $isClosed ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-300' : ($isPending ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400' : 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400') }}">
+                                        <i class="fa-solid {{ $item['icon'] }}"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $item['label'] }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ $open->format('d M Y') }} — {{ $close->format('d M Y') }}</p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    @if($isClosed)
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">Ditutup</span>
+                                    @elseif($isPending)
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/30">Belum Buka</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/30">Buka · {{ (int) $now->diffInDays($close) }} hari lagi</span>
+                                    @endif
+                                </div>
+                            </div>
+                        @endif
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         {{-- Quick Actions --}}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <a href="{{ route('mentor.mahasiswa.pkl') }}"
+            <a href="{{ route('mentor.mahasiswa.index') }}"
                class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-briefcase"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Manajemen PKL Magang</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola mahasiswa jalur magang reguler dan pantau kelengkapan dokumen.</p>
+                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Data Mahasiswa</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Kelola seluruh mahasiswa bimbingan dan pantau kelengkapan dokumen.</p>
                         <span class="inline-flex items-center gap-1 mt-3 text-sm font-medium text-blue-600 dark:text-blue-400">
                             Buka <i class="fa-solid fa-arrow-right text-xs"></i>
                         </span>
@@ -99,15 +153,15 @@
                 </div>
             </a>
 
-            <a href="{{ route('mentor.mahasiswa.msib') }}"
+            <a href="{{ route('mentor.nilai.index') }}"
                class="group bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-colors">
                 <div class="flex items-start gap-4">
                     <div class="w-10 h-10 rounded-md bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
                         <i class="fa-solid fa-rocket"></i>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Manajemen MSIB / PMK</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Monitoring peserta Kampus Merdeka dan verifikasi sertifikat.</p>
+                        <h3 class="font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">Penilaian</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Input nilai seluruh peserta PKL dan MSIB/PMK.</p>
                         <span class="inline-flex items-center gap-1 mt-3 text-sm font-medium text-blue-600 dark:text-blue-400">
                             Buka <i class="fa-solid fa-arrow-right text-xs"></i>
                         </span>

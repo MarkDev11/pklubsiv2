@@ -103,6 +103,55 @@ There is no `/register` route or public signup form. All users (mahasiswa, dosen
 - Admin user list shows `proposal.jns_pkl` for mahasiswa with proposals, fallback to `users.jenis` for display purposes
 - Import system accepts optional jenis column (admin can pre-set defaults for bulk import)
 
+### Mahasiswa Proposal & Laporan Flow
+
+**Mahasiswa proposal ownership uses NIM/username as the natural key.**
+
+- Use `ProposalMahasiswa::where('nim', $user->username)` for mahasiswa-facing proposal, dashboard, laporan, and file access flows.
+- Do not rely on `proposal_mahasiswas.user_id` for mahasiswa ownership checks in controllers or file authorization. Existing/imported data may have correct `nim` while `user_id` is stale.
+- Request identity fields (`nim`, `nama`, `kd_lokal`) are not trusted from browser input. `StoreProposalRequest` and `UpdateProposalRequest` force them from the authenticated user before validation; `ProposalService` also persists identity from the authenticated user.
+- Mahasiswa can update proposal/laporan only while not graded (`nilai` not greater than 0).
+- Upload laporan and reset laporan both require the laporan period to be open (`OpeningHour::isLaporanBuka()`).
+- Upload laporan requires at least one file among `lp`, `lpp`, or `skp`; empty uploads must fail validation.
+- Mentor accounts are auto-created/synced from proposal mentor data. New mentor default password intentionally uses `hp_mentor`; existing mentor passwords must not be changed silently.
+
+### Dosen PA Flow
+
+**Dosen PA ownership is strict NIP/username based. Do not fall back to dosen names.**
+
+- `users.nama_dosen_pa` stores the Dosen PA username/NIP for mahasiswa users.
+- `proposal_mahasiswas.dosen_pa` stores the Dosen PA username/NIP for proposals.
+- Dosen-facing proposal/list/detail/nilai/export queries must scope by authenticated dosen username/NIP.
+- Dosen detail modals should resolve proposal data by mahasiswa NIM/username when needed; do not assume `proposal_mahasiswas.user_id` is always reliable.
+- Dosen can input nilai even if mahasiswa document uploads are incomplete, matching legacy v1 behavior.
+- Dosen scoped CSV exports live on separate pages:
+  - `/dosen/exports/pkl` (`dosen.exports.pkl.index`)
+  - `/dosen/exports/msib` (`dosen.exports.msib.index`)
+- Dosen PDF routes remain available for cetak/rekap behavior; do not remove unless explicitly requested.
+
+### Mentor Flow
+
+**Mentor ownership is scoped by mentor email.**
+
+- Mentor-facing proposal/list/detail/nilai/PDF queries must scope by authenticated mentor `email` against `proposal_mahasiswas.email_mentor`.
+- Mentor PKL/MSIB pages are intentionally merged into unified pages:
+  - `/mentor/mahasiswa` (`mentor.mahasiswa.index`)
+  - `/mentor/nilai` (`mentor.nilai.index`)
+- Old mentor PKL/MSIB URLs redirect to the unified pages for usability.
+- Mentor can input nilai even if mahasiswa document uploads are incomplete, matching legacy v1 behavior.
+- Mentor export routes are intentionally disabled. Mentor can still use PDF cetak rekap routes.
+- Mentor detail modals should show active document fields only: `skm`, `lp`, `lpp`, `skp`. The `proposal` file field is legacy/unused in the active flow.
+
+### Export & PDF Rules
+
+- Admin uses Export Data for downloads; old admin Data Mahasiswa PDF buttons/routes are removed.
+- Admin export generation must use server-side filters saved on the `exports` record, not browser-submitted row data.
+- CSV output must guard against formula injection for values starting with `=`, `+`, `-`, or `@`.
+- Public export short-code downloads are intentionally accessible for external sharing, but must stay rate-limited.
+- `exports.short_code` length is 10; keep generated codes at 10 characters.
+- Dosen export pages use scoped exports; mentor export pages/routes should not exist.
+- Dosen and mentor PDF rekap/cetak routes remain separate from CSV export behavior.
+
 ### Services Layer
 
 Business logic is intentionally separated from controllers. Add domain logic here before bloating controllers:
@@ -126,7 +175,7 @@ Frequently used query scopes:
 - `sudahDinilai()` — `nilai` > 0
 - `magang()` — `jns_pkl` == `'Magang'`
 - `msib()` — `jns_pkl` != `'Magang'` or contains PMK/MSIB
-- `byDosen($namaDosen)` — via `user.nama_dosen_pa`
+- `byDosen($nipDosen)` — via `user.nama_dosen_pa` (stores Dosen PA username/NIP)
 - `byMentor($emailMentor)` — via `email_mentor`
 
 ## Frontend

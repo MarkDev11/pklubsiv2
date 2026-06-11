@@ -74,6 +74,40 @@ class LaporanControllerTest extends TestCase
         $this->assertNotNull($proposal->skp);
     }
 
+    public function test_mahasiswa_upload_uses_nim_ownership_when_user_id_differs(): void
+    {
+        Storage::fake('public');
+
+        $staleUser = User::factory()->mahasiswa()->create();
+        $proposal = ProposalMahasiswa::factory()->create([
+            'user_id' => $staleUser->id,
+            'nim' => $this->mahasiswa->username,
+        ]);
+
+        $lp = UploadedFile::fake()->create('laporan.pdf', 1000);
+
+        $response = $this->actingAs($this->mahasiswa)->post(route('mahasiswa.laporan.upload'), [
+            'lp' => $lp,
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.dashboard'));
+
+        $proposal->refresh();
+        $this->assertNotNull($proposal->lp);
+    }
+
+    public function test_mahasiswa_cannot_upload_empty_laporan_request(): void
+    {
+        ProposalMahasiswa::factory()->create([
+            'user_id' => $this->mahasiswa->id,
+            'nim' => $this->mahasiswa->username,
+        ]);
+
+        $response = $this->actingAs($this->mahasiswa)->post(route('mahasiswa.laporan.upload'), []);
+
+        $response->assertSessionHasErrors('lp');
+    }
+
     public function test_mahasiswa_can_reset_laporan(): void
     {
         Storage::fake('public');
@@ -94,6 +128,32 @@ class LaporanControllerTest extends TestCase
         $this->assertNull($proposal->lp);
         $this->assertNull($proposal->lpp);
         $this->assertNull($proposal->skp);
+    }
+
+    public function test_mahasiswa_cannot_reset_laporan_outside_window(): void
+    {
+        OpeningHour::query()->update([
+            'open_laporan' => now()->subDays(30),
+            'close_laporan' => now()->subDays(1),
+        ]);
+
+        $proposal = ProposalMahasiswa::factory()->create([
+            'user_id' => $this->mahasiswa->id,
+            'nim' => $this->mahasiswa->username,
+            'lp' => 'old_laporan.pdf',
+            'lpp' => 'old_penilaian.pdf',
+            'skp' => 'old_surat.pdf',
+        ]);
+
+        $response = $this->actingAs($this->mahasiswa)->post(route('mahasiswa.laporan.reset'));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+
+        $proposal->refresh();
+        $this->assertSame('old_laporan.pdf', $proposal->lp);
+        $this->assertSame('old_penilaian.pdf', $proposal->lpp);
+        $this->assertSame('old_surat.pdf', $proposal->skp);
     }
 
     public function test_mahasiswa_cannot_upload_laporan_outside_window(): void

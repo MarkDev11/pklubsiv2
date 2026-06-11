@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Mahasiswa;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class UploadLaporanRequest extends FormRequest
 {
@@ -21,6 +22,15 @@ class UploadLaporanRequest extends FormRequest
             'lpp' => ['nullable', 'file', 'mimes:pdf', 'max:40960'],
             'skp' => ['nullable', 'file', 'mimes:pdf', 'max:40960'],
         ];
+    }
+
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            if (! $this->hasFile('lp') && ! $this->hasFile('lpp') && ! $this->hasFile('skp')) {
+                $validator->errors()->add('lp', 'Pilih minimal satu file laporan untuk diunggah.');
+            }
+        });
     }
 
     public function messages(): array

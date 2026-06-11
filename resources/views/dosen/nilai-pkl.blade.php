@@ -273,11 +273,5 @@
             @endif
         </div>
 
-        @include('partials.scoped-export-panel', [
-            'exportAction' => route('dosen.exports.pkl'),
-            'exportCategory' => 'pkl',
-            'exportHistory' => $exportHistory,
-        ])
-
     </div>
 </x-app-layout>

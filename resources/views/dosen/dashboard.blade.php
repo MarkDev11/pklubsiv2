@@ -234,26 +234,26 @@
                 </div>
             </div>
 
-            {{-- Cetak Dokumen --}}
+            {{-- Export --}}
             <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-md bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                        <i class="fa-solid fa-print"></i>
+                        <i class="fa-solid fa-file-export"></i>
                     </div>
-                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Cetak Berita Acara</h2>
+                    <h2 class="text-base font-semibold text-gray-900 dark:text-white">Export</h2>
                 </div>
                 <div class="space-y-2">
-                    <a href="{{ route('dosen.pdf.pkl') }}" target="_blank" class="flex items-center justify-between p-3 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:border-rose-300 dark:hover:border-rose-700 group transition-colors">
+                    <a href="{{ route('dosen.exports.pkl.index') }}" class="flex items-center justify-between p-3 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:border-rose-300 dark:hover:border-rose-700 group transition-colors">
                         <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-rose-600 dark:group-hover:text-rose-400">
-                            <i class="fa-solid fa-file-pdf text-rose-500"></i> Berita Acara PKL
+                            <i class="fa-solid fa-file-export text-rose-500"></i> Export PKL
                         </span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400 group-hover:text-rose-500"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:text-rose-500"></i>
                     </a>
-                    <a href="{{ route('dosen.pdf.msib') }}" target="_blank" class="flex items-center justify-between p-3 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:border-rose-300 dark:hover:border-rose-700 group transition-colors">
+                    <a href="{{ route('dosen.exports.msib.index') }}" class="flex items-center justify-between p-3 rounded-md border border-gray-200 dark:border-gray-700 hover:bg-rose-50 dark:hover:bg-rose-900/10 hover:border-rose-300 dark:hover:border-rose-700 group transition-colors">
                         <span class="inline-flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-rose-600 dark:group-hover:text-rose-400">
-                            <i class="fa-solid fa-file-pdf text-rose-500"></i> Dokumen MSIB
+                            <i class="fa-solid fa-file-export text-rose-500"></i> Export MSIB
                         </span>
-                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-gray-400 group-hover:text-rose-500"></i>
+                        <i class="fa-solid fa-chevron-right text-xs text-gray-400 group-hover:text-rose-500"></i>
                     </a>
                 </div>
             </div>

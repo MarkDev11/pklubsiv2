@@ -30,7 +30,7 @@ class LaporanController extends Controller
     public function upload(UploadLaporanRequest $request): RedirectResponse
     {
         $user = $this->authenticatedUser();
-        $proposal = ProposalMahasiswa::where('user_id', $user->id)->firstOrFail();
+        $proposal = ProposalMahasiswa::where('nim', $user->username)->firstOrFail();
 
         $this->authorize('uploadLaporan', $proposal);
 
@@ -42,9 +42,9 @@ class LaporanController extends Controller
 
         $data = [];
         $prefixes = ['lp' => 'laporan', 'lpp' => 'penilaian', 'skp' => 'suratketerangan'];
-        
+
         // Use jns_pkl from proposal for file naming (simplified)
-        $jenisFile = match(true) {
+        $jenisFile = match (true) {
             str_contains($proposal->jns_pkl ?? '', 'Program Magang khusus') => 'PMK',
             ($proposal->jns_pkl ?? '') === 'Magang' => 'Magang',
             default => 'PKL'
@@ -77,6 +77,12 @@ class LaporanController extends Controller
 
         if ($proposal) {
             $this->authorize('resetLaporan', $proposal);
+
+            $openingHours = $this->dashboardService->getOpeningHours();
+
+            if ($openingHours && ! $openingHours->isLaporanBuka()) {
+                return back()->with('error', 'Reset laporan sedang ditutup.');
+            }
 
             foreach (['lp', 'lpp', 'skp'] as $field) {
                 $this->proposalService->deleteOldFile($proposal->{$field});

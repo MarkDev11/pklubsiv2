@@ -20,6 +20,53 @@ class NilaiController extends Controller
         protected DashboardService $dashboardService,
     ) {}
 
+    public function index(): View
+    {
+        $user = $this->authenticatedUser();
+        $query = ProposalMahasiswa::where('email_mentor', $user->username)->with('user');
+
+        if (request('jenis') === 'magang') {
+            $query->magang();
+        } elseif (request('jenis') === 'msib') {
+            $query->msib();
+        }
+
+        if (request('search')) {
+            $search = request('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nim', 'like', "%{$search}%")
+                    ->orWhere('tempat_riset', 'like', "%{$search}%")
+                    ->orWhere('nama_mentor', 'like', "%{$search}%");
+            });
+        }
+
+        if (request('kelengkapan') === 'lengkap') {
+            $query->whereNotNull('lp')
+                ->whereNotNull('lpp')
+                ->whereNotNull('skp');
+        } elseif (request('kelengkapan') === 'tidak_lengkap') {
+            $query->where(function ($q) {
+                $q->whereNull('lp')
+                    ->orWhereNull('lpp')
+                    ->orWhereNull('skp');
+            });
+        }
+
+        if (request('status_nilai') === 'sudah') {
+            $query->where('nilai', '>', 0);
+        } elseif (request('status_nilai') === 'belum') {
+            $query->where(function ($q) {
+                $q->whereNull('nilai')->orWhere('nilai', '<=', 0);
+            });
+        }
+
+        $proposals = $query->paginate(50)->withQueryString();
+        $openingHours = $this->dashboardService->getOpeningHours();
+
+        return view('mentor.nilai-pkl', compact('proposals', 'openingHours'));
+    }
+
     public function pklIndex(): View
     {
         $user = $this->authenticatedUser();

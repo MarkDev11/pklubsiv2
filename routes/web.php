@@ -193,6 +193,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/pdf/pkl', [DosenNilaiController::class, 'generatePdfPkl'])->name('pdf.pkl');
         Route::get('/pdf/msib', [DosenNilaiController::class, 'generatePdfMsib'])->name('pdf.msib');
+        Route::get('/exports/pkl', [DosenNilaiController::class, 'exportPklIndex'])->name('exports.pkl.index');
+        Route::get('/exports/msib', [DosenNilaiController::class, 'exportMsibIndex'])->name('exports.msib.index');
         Route::post('/exports/pkl', [DosenNilaiController::class, 'exportPkl'])->middleware('throttle:5,1')->name('exports.pkl');
         Route::post('/exports/msib', [DosenNilaiController::class, 'exportMsib'])->middleware('throttle:5,1')->name('exports.msib');
     });
@@ -205,12 +207,14 @@ Route::middleware('auth')->group(function () {
     Route::prefix('mentor')->middleware('role:mentor')->name('mentor.')->group(function () {
         Route::get('/', [MentorDashboard::class, 'index'])->name('dashboard');
 
-        Route::get('/mahasiswa/pkl', [MentorDataMahasiswa::class, 'pklIndex'])->name('mahasiswa.pkl');
-        Route::get('/mahasiswa/msib', [MentorDataMahasiswa::class, 'msibIndex'])->name('mahasiswa.msib');
+        Route::get('/mahasiswa', [MentorDataMahasiswa::class, 'index'])->name('mahasiswa.index');
+        Route::redirect('/mahasiswa/pkl', '/mentor/mahasiswa')->name('mahasiswa.pkl');
+        Route::redirect('/mahasiswa/msib', '/mentor/mahasiswa')->name('mahasiswa.msib');
         Route::get('/mahasiswa/{encrypted}/detail', [MentorDataMahasiswa::class, 'detail'])->name('mahasiswa.detail');
 
-        Route::get('/nilai/pkl', [MentorNilaiController::class, 'pklIndex'])->name('nilai.pkl');
-        Route::get('/nilai/msib', [MentorNilaiController::class, 'msibIndex'])->name('nilai.msib');
+        Route::get('/nilai', [MentorNilaiController::class, 'index'])->name('nilai.index');
+        Route::redirect('/nilai/pkl', '/mentor/nilai')->name('nilai.pkl');
+        Route::redirect('/nilai/msib', '/mentor/nilai')->name('nilai.msib');
         Route::post('/nilai/save', [MentorNilaiController::class, 'saveNilai'])->middleware('throttle:60,1')->name('nilai.save');
 
         Route::get('/pdf/pkl', [MentorNilaiController::class, 'generatePdfPkl'])->name('pdf.pkl');

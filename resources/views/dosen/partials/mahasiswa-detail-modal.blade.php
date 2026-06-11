@@ -137,18 +137,12 @@
                                 {{-- Document Status --}}
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Kelengkapan Dokumen</p>
-                                    <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+                                    <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                                         <div :class="modalData?.proposal?.files?.skm ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700' : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600'" 
                                              class="rounded-lg p-3 border text-center">
                                             <i :class="modalData?.proposal?.files?.skm ? 'fa-check-circle text-emerald-600 dark:text-emerald-400' : 'fa-times-circle text-gray-400'" 
                                                class="fa-solid text-2xl mb-1"></i>
                                             <p class="text-xs font-medium" :class="modalData?.proposal?.files?.skm ? 'text-emerald-800 dark:text-emerald-200' : 'text-gray-500 dark:text-gray-400'">SKM</p>
-                                        </div>
-                                        <div :class="modalData?.proposal?.files?.proposal ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700' : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600'" 
-                                             class="rounded-lg p-3 border text-center">
-                                            <i :class="modalData?.proposal?.files?.proposal ? 'fa-check-circle text-emerald-600 dark:text-emerald-400' : 'fa-times-circle text-gray-400'" 
-                                               class="fa-solid text-2xl mb-1"></i>
-                                            <p class="text-xs font-medium" :class="modalData?.proposal?.files?.proposal ? 'text-emerald-800 dark:text-emerald-200' : 'text-gray-500 dark:text-gray-400'">Proposal</p>
                                         </div>
                                         <div :class="modalData?.proposal?.files?.lp ? 'bg-emerald-100 dark:bg-emerald-900/30 border-emerald-300 dark:border-emerald-700' : 'bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600'" 
                                              class="rounded-lg p-3 border text-center">

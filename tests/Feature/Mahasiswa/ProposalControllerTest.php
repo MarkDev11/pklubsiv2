@@ -16,15 +16,16 @@ class ProposalControllerTest extends TestCase
     use RefreshDatabase;
 
     protected User $mahasiswa;
+
     protected User $dosen;
 
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Create dosen first for valid Dosen PA reference
         $this->dosen = User::factory()->dosen()->create();
-        
+
         $this->mahasiswa = User::factory()->mahasiswa()->create([
             'nama_dosen_pa' => $this->dosen->username,
         ]);
@@ -70,6 +71,63 @@ class ProposalControllerTest extends TestCase
             'nim' => $this->mahasiswa->username,
             'judul_pkl' => 'Test Proposal Title',
         ]);
+    }
+
+    public function test_proposal_create_uses_authenticated_identity_not_posted_identity(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->create('skm.pdf', 1000);
+
+        $response = $this->actingAs($this->mahasiswa)->post(route('mahasiswa.proposal.store'), [
+            'nim' => '99999999',
+            'nama' => 'Nama Palsu',
+            'kd_lokal' => 'ZZZ.99',
+            'jns_pkl' => 'Magang',
+            'judul_pkl' => 'Test Proposal Title',
+            'tempat_riset' => 'Test Company',
+            'nama_mentor' => 'Test Mentor',
+            'hp_mentor' => '08123456789',
+            'email_mentor' => 'mentor@test.com',
+            'skm' => $file,
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.proposal.index'));
+        $this->assertDatabaseHas('proposal_mahasiswas', [
+            'nim' => $this->mahasiswa->username,
+            'nama' => $this->mahasiswa->name,
+            'kd_lokal' => $this->mahasiswa->kd_lokal,
+        ]);
+        $this->assertDatabaseMissing('proposal_mahasiswas', [
+            'nim' => '99999999',
+        ]);
+    }
+
+    public function test_proposal_create_creates_mentor_password_from_phone(): void
+    {
+        Storage::fake('public');
+
+        $file = UploadedFile::fake()->create('skm.pdf', 1000);
+
+        $response = $this->actingAs($this->mahasiswa)->post(route('mahasiswa.proposal.store'), [
+            'nim' => $this->mahasiswa->username,
+            'nama' => $this->mahasiswa->name,
+            'jns_pkl' => 'Magang',
+            'judul_pkl' => 'Test Proposal Title',
+            'tempat_riset' => 'Test Company',
+            'nama_mentor' => 'Phone Password Mentor',
+            'hp_mentor' => '08555555555',
+            'email_mentor' => 'phone-password-mentor@test.com',
+            'skm' => $file,
+        ]);
+
+        $response->assertRedirect(route('mahasiswa.proposal.index'));
+
+        $mentor = User::where('username', 'phone-password-mentor@test.com')->firstOrFail();
+        $this->assertTrue($mentor->isMentor());
+        $this->assertSame('Phone Password Mentor', $mentor->name);
+        $this->assertSame('08555555555', $mentor->phone);
+        $this->assertTrue(Hash::check('08555555555', $mentor->password));
     }
 
     public function test_mahasiswa_can_update_proposal(): void

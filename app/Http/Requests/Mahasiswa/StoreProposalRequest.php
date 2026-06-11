@@ -7,6 +7,21 @@ use Illuminate\Validation\Rule;
 
 class StoreProposalRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        $user = $this->user();
+
+        if (! $user) {
+            return;
+        }
+
+        $this->merge([
+            'nim' => $user->username,
+            'nama' => $user->name,
+            'kd_lokal' => $user->kd_lokal,
+        ]);
+    }
+
     public function authorize(): bool
     {
         return true;

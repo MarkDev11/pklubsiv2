@@ -99,7 +99,7 @@ class FileController extends Controller
         }
 
         if ($user->isMahasiswa()) {
-            $proposal = ProposalMahasiswa::where('user_id', $user->id)->first();
+            $proposal = ProposalMahasiswa::where('nim', $user->username)->first();
 
             return array_values(array_filter([
                 $proposal?->skm,

@@ -46,6 +46,24 @@ class FileControllerTest extends TestCase
         $response->assertOk();
     }
 
+    public function test_mahasiswa_file_access_uses_nim_ownership_when_user_id_differs(): void
+    {
+        $mahasiswa = User::factory()->mahasiswa()->create();
+        $staleUser = User::factory()->mahasiswa()->create();
+
+        ProposalMahasiswa::factory()->create([
+            'user_id' => $staleUser->id,
+            'nim' => $mahasiswa->username,
+            'lp' => 'nim_owned_laporan.pdf',
+        ]);
+
+        Storage::disk('public')->put('uploads/nim_owned_laporan.pdf', 'content');
+
+        $response = $this->actingAs($mahasiswa)->get(route('files.serve', encryptUrl('nim_owned_laporan.pdf')));
+
+        $response->assertOk();
+    }
+
     public function test_mahasiswa_cannot_access_others_files(): void
     {
         $mahasiswa = User::factory()->mahasiswa()->create();

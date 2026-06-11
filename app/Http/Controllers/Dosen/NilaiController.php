@@ -66,9 +66,8 @@ class NilaiController extends Controller
 
         $proposals = $query->paginate(50)->withQueryString();
         $openingHours = $this->dashboardService->getOpeningHours();
-        $exportHistory = $this->scopedExportService->history($user, 'pkl');
 
-        return view('dosen.nilai-pkl', compact('proposals', 'openingHours', 'exportHistory'));
+        return view('dosen.nilai-pkl', compact('proposals', 'openingHours'));
     }
 
     public function msibIndex(): View
@@ -113,9 +112,22 @@ class NilaiController extends Controller
 
         $proposals = $query->paginate(50)->withQueryString();
         $openingHours = $this->dashboardService->getOpeningHours();
-        $exportHistory = $this->scopedExportService->history($user, 'msib');
 
-        return view('dosen.nilai-msib', compact('proposals', 'openingHours', 'exportHistory'));
+        return view('dosen.nilai-msib', compact('proposals', 'openingHours'));
+    }
+
+    public function exportPklIndex(): View
+    {
+        $exportHistory = $this->scopedExportService->history($this->authenticatedUser(), 'pkl');
+
+        return view('dosen.export-pkl', compact('exportHistory'));
+    }
+
+    public function exportMsibIndex(): View
+    {
+        $exportHistory = $this->scopedExportService->history($this->authenticatedUser(), 'msib');
+
+        return view('dosen.export-msib', compact('exportHistory'));
     }
 
     public function saveNilai(SaveNilaiRequest $request): mixed

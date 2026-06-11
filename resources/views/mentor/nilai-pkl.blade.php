@@ -1,12 +1,12 @@
 <x-app-layout>
-    <x-slot name="title">Penilaian PKL Magang</x-slot>
+    <x-slot name="title">Penilaian</x-slot>
 
     <div class="space-y-6">
 
         {{-- Header --}}
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Input Nilai PKL — Magang Reguler</h1>
+                <h1 class="text-2xl font-semibold text-gray-900 dark:text-white">Input Nilai Mahasiswa</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <i class="fa-solid fa-users text-xs mr-1"></i>
                     <span class="tabular-nums">{{ $proposals->total() }}</span> mahasiswa bimbingan industri
@@ -22,14 +22,19 @@
                 <a href="{{ route('mentor.pdf.pkl') }}" target="_blank"
                    class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                     <i class="fa-solid fa-file-pdf text-rose-500"></i>
-                    <span>Cetak Rekap</span>
+                    <span>Cetak PKL</span>
+                </a>
+                <a href="{{ route('mentor.pdf.msib') }}" target="_blank"
+                   class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 text-xs font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fa-solid fa-file-pdf text-rose-500"></i>
+                    <span>Cetak MSIB</span>
                 </a>
             </div>
         </div>
 
         {{-- Search & Filter --}}
         <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-            <form method="GET" action="{{ route('mentor.nilai.pkl') }}"
+            <form method="GET" action="{{ route('mentor.nilai.index') }}"
                   x-data="{
                       search: @js(request('search', '')),
                       submitForm() { $el.submit(); }
@@ -43,6 +48,14 @@
                                placeholder="Cari nama, NIM, atau tempat..."
                                class="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                     </div>
+                </div>
+
+                <div class="w-full lg:w-48">
+                    <select name="jenis" @change="submitForm()" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="">Semua Jenis</option>
+                        <option value="magang" {{ request('jenis') == 'magang' ? 'selected' : '' }}>PKL</option>
+                        <option value="msib" {{ request('jenis') == 'msib' ? 'selected' : '' }}>MSIB/PMK</option>
+                    </select>
                 </div>
 
                 <div class="w-full lg:w-48">
@@ -61,8 +74,8 @@
                     </select>
                 </div>
 
-                @if(request()->hasAny(['search', 'kelengkapan', 'status_nilai']))
-                    <a href="{{ route('mentor.nilai.pkl') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors flex items-center gap-2">
+                @if(request()->hasAny(['search', 'jenis', 'kelengkapan', 'status_nilai']))
+                    <a href="{{ route('mentor.nilai.index') }}" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-md transition-colors flex items-center gap-2">
                         <i class="fa-solid fa-rotate-left"></i>
                         <span class="hidden sm:inline">Reset</span>
                     </a>
@@ -92,6 +105,7 @@
                             <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
                                 <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-16">No</th>
                                 <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Mahasiswa</th>
+                                <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Jenis</th>
                                 <th class="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Tempat Riset</th>
                                 <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider">Kelengkapan</th>
                                 <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-400 uppercase text-xs tracking-wider w-32">
@@ -105,6 +119,12 @@
                             @foreach($proposals as $i => $p)
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                                 <td class="px-4 py-3 text-center text-gray-500 dark:text-gray-400 tabular-nums">{{ $i + 1 }}</td>
+
+                                <td class="px-4 py-3">
+                                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium border {{ $p->jns_pkl === 'Magang' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200 dark:bg-cyan-900/20 dark:text-cyan-400 dark:border-cyan-800/30' }}">
+                                        {{ $p->jns_pkl === 'Magang' ? 'PKL' : 'MSIB/PMK' }}
+                                    </span>
+                                </td>
 
                                 <td class="px-4 py-3">
                                     <div class="font-semibold text-gray-900 dark:text-white">{{ $p->nama }}</div>
